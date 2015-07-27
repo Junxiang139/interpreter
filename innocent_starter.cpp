@@ -62,6 +62,20 @@ struct intnum {
 	}
 };
 
+template <class T>
+class nums {
+	T a;
+};
+
+template <class T>
+T getv(int v) {
+	intnum a;
+	floatnum b;
+	if (v == 1) return a;
+	else return b;
+}
+
+nums<intnum> asdfg;
 /*
 template <typename T>
 void type (T a) {
@@ -113,8 +127,17 @@ int numv(string s) {
 	}
 	return 0;
 }
-int eplus(int a, int b) {
-	return a + b;
+template <class T>
+T eplus(T a, T b) {
+	if (typeid(a) == typeid(floatnum) || typeid(b) == typeid(floatnum)) {
+		floatnum c;
+		c.value = a.value + b.value;
+		return c;
+	} else {
+		intnum c;
+		c.value = a.value + b.value;
+		return c;
+	}
 }
 int eminus(int a, int b) {
 	return a - b;
@@ -154,9 +177,12 @@ int getvalue(string s) {
 		//cout << s1 << endl << s2 << endl;
 		int v1 = getvalue(s1), v2 = getvalue(s2);
 		switch(s[1]) {
-			case '+':
-				return eplus(v1, v2);
+			case '+': {
+				intnum vv1, vv2;
+				vv1.value = v1, vv2.value = v2;
+				return eplus<intnum>(vv1, vv2).value;
 				break;
+			}
 			case '-':
 				return eminus(v1, v2);
 				break;
@@ -177,6 +203,10 @@ int main() {
 	s.clear();
 	char forgets[1005];
 	while (1) {
+		cout << a.value << endl;
+		int valve;
+		cin >> valve;
+		getv<floatnum>(valve);
 		gets(forgets);
 		s += forgets;
 		calclr(s);
