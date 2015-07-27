@@ -6,49 +6,85 @@ try to apply plus in integer
 #include<cstdlib>
 #include<cstring>
 #include<algorithm>
+#include<typeinfo>
 #include<iostream>
 #include<vector>
 #include<string>
 using namespace std;
-struct intnum {
-	int id;
-	int value;
-	intnum () {
-		id = 1;
-		value = 0;
-	}
-};
+
 struct floatnum {
-	int id;
 	double value;
 	floatnum () {
-		id = 2;
+		//id = 2;
 		value = 0;
 	}
 };
+
 struct bignum {
-	int id;
+	//int id;
 	int a[258];
 	bigbum () {
-		id = 3;
+		//id = 3;
+		a[0] = 0;
+	}
+	operator floatnum () const {
+		floatnum b;
+		for (int i = 1; i <= a[0]; i++) {
+			b.value = b.value * 10 + a[0];
+		}
+		return b;
 	}
 };
+
+struct intnum {
+	int value;
+	intnum () {
+		//id = 1;
+		value = 0;
+	}
+	
+	operator bignum () const {
+		bignum b;
+		int len = 0;
+		int v = value;
+		while (v) {
+			len++;
+			b.a[len] = v % 10;
+			v /= 10;
+		}
+		b.a[0] = len;
+	}
+	
+	operator floatnum () const {
+		floatnum b;
+		b.value = value;
+		return b;
+	}
+};
+
+/*
 template <typename T>
 void type (T a) {
 	cout << a.id << endl;
 }
+*/
+
+/*
 template <typename T>
 floatnum cfloatnum(T a) {
-	if (a.id == 2) return a;
-	if (a.id == 1) {
+	if (typeid(a) == typeid(floatnum)) return a;
+	if (typeid(a) == typeid(intnum)) {
 		floatnum b;
 		b.value = a.value;
 		return b;
 	}
 }
+*/
+
 vector<intnum> intlist;    //rank % 3 = 0
 vector<floatnum> floatlist;//rank % 3 = 1
 vector<bignum> biglist;    //rank % 3 = 2
+
 int lbra = 0, rbra = 0;
 void calclr(string s) {
 	int len = s.length();
