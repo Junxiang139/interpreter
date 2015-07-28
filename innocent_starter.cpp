@@ -64,8 +64,6 @@ struct intnum {
 };
 */
 
-num cfloat(const num &b);
-
 struct num {
 	int id;//1 2 3
 	int intnum;
@@ -87,7 +85,7 @@ struct num {
 	}
 	num (string b) {
 		int l = b.length();
-		printf("l = %d\n", l);
+		//printf("l = %d\n", l);
 		zf = 0;
 		if (b[0] == '-') zf = 1;
 		if (l < 9) {
@@ -103,7 +101,7 @@ struct num {
 				}
 			}
 		} else {
-			printf("here\n");
+			//printf("here\n");
 			id = 3;
 			a[0] = l;
 			///*
@@ -111,26 +109,31 @@ struct num {
 				for (int i = l - 1, j = 1; j <= l; j++, i--) {
 					a[j] = b[i] - '0';
 				}
+				/*
 				printf("id = %d\n", id);
 				for (int i = 0; i <= a[0]; i++) {
 					printf("%d", a[i]);
 				}
 				printf("\n");
+				*/
 			} else {
 				for (int i = l - 1, j = 1; j < l; j++, i--) {
 					a[j] = b[i] - '0';
 				}
+				/*
 				printf("id = %d\n", id);
 				for (int i = 0; i <= a[0]; i++) {
 					printf("%d", a[i]);
 				}
 				printf("\n");
+				*/
 			}
 			//*/
 		}
 	}
 	
-	num operator+(const num &c) const {
+	num operator+(const num &c) const;
+	/* {
 		if (id == 1 && c.id == 1) {
 			num a;
 			a.id = 1;
@@ -142,7 +145,7 @@ struct num {
 		} else {
 			
 		}
-	}
+	}*/
 	
 	num operator-(const num &b) const {
 		num a;
@@ -175,15 +178,49 @@ struct num {
 num cfloat(const num &b) {
 	num a;
 	a.id = 2;
+	a.floatnum = 0.0;
 	if (b.id == 1) {
 		a.floatnum = b.intnum;
 	} else if (b.id == 2) {
 		return b;
 	} else if (b.id == 3) {
 		for (int i = b.a[0]; i >= 1; i--) {
-			a.floatnum = a.floatnum * 10 + (b.a[i] - '0');
+			a.floatnum = a.floatnum * 10 + b.a[i];
+			//printf("v %f\n", a.floatnum);
 		}
 		if (b.zf == 1) a.floatnum = -a.floatnum;
+		//printf("v %f\n", a.floatnum);
+	}
+	return a;
+}
+
+num cbignum(const num &b) {
+	num a;
+	a.id = 3;
+	if (b.id == 3) {
+		return b;
+	} else if (b.id == 1) {
+		int v = b.intnum, l = 0;
+		while (v) {
+			l++;
+			a.a[l] = v % 10;
+			v /= 10;
+		}
+		a.a[0] = l;
+	}
+	return a;
+}
+
+num num::operator+(const num &c) const {
+	num a, b;
+	if (id == 1 && c.id == 1) {
+		a.id = 1;
+		a.intnum = intnum + c.intnum;
+	} else if (id == 2 || c.id == 2) {
+		a = cfloat(*this), b = cfloat(c);
+		a.floatnum += b.floatnum;
+	} else {
+		a = cbignum(*this), b = cbignum(c);
 	}
 	return a;
 }
@@ -267,9 +304,14 @@ num numv(string s) {
 	}
 	if (dot) {
 		v.id = 2, v.floatnum = 0;
+		double q = 1;
+		int dot1 = 0;
 		for (int i = st; i < len; i++) {
+			if (dot1) q *= 10.0;
+			if (s[i] == '.') dot1 = 1;
 			if (s[i] != '.') v.floatnum = v.floatnum * 10 + (s[i] - '0');
 		}
+		v.floatnum /= q;
 		if (st == 1) v.floatnum = -v.floatnum;
 	} else if (len < 9) {
 		v.id = 1, v.intnum = 0;
@@ -278,6 +320,7 @@ num numv(string s) {
 		}
 		if (st == 1) v.intnum = -v.intnum;
 	} else {
+		v.id = 3;
 		//v.a.clear();
 		if (st == 1) {v.zf = 1, v.a[0] = len - 1;}
 		else {v.zf = 0, v.a[0] = len;}
@@ -303,6 +346,7 @@ T eplus(T a, T b) {
 }
 */
 num eplus(num a, num b) {
+	//printf("id %d %d\n", a.id, b.id);
 	return a + b;
 }
 num eminus(num a, num b) {
@@ -365,6 +409,7 @@ int main() {
 	string s, s1;
 	s.clear();
 	char forgets[1005];
+	/*
 	num fairy;
 	fairy = 3.1416;
 	cout << fairy << endl;
@@ -375,6 +420,7 @@ int main() {
 	string b = "1293801124532134422";
 	fairy = b;
 	cout << fairy << fairy.id << endl;
+	*/
 	//return 0;
 	while (1) {
 		gets(forgets);
@@ -385,7 +431,7 @@ int main() {
 		if (s.length() >= 8) {
 			string s2 (s, 1, 6);
 			if (s2 == "define") {
-				continue;		
+				continue;
 			}
 		}
 		cout << getvalue(s) << endl;
