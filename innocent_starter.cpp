@@ -68,36 +68,64 @@ struct num {
 	int id;//1 2 3
 	int intnum;
 	double floatnum;
-	vector<int> a;
+	bool zf;
+	int a[105];
 	num () {
 		id = intnum = 0;
 		floatnum = 0;
-		a.clear();
+		//a.clear();
 	}
-	template <typename T>
-	num (T b) {
-		if (typeid(b) == typeid(int)) {
+	num (int b) {
+		id = 1;
+		intnum = b;
+	}
+	num (double b) {
+		id = 2;
+		floatnum = b;
+	}
+	num (string b) {
+		int l = b.length();
+		printf("l = %d\n", l);
+		zf = 0;
+		if (b[0] == '-') zf = 1;
+		if (l < 9) {
 			id = 1;
-			intnum = b;
-		} else if (typeid(b) == typeid(double)) {
-			id = 2;
-			floatnum = b;
-		}/* else if (typeid(b) == typeid(string)) {
-			int l = 8;
-			if (l < 9) {
-				id = 1;
-				intnum = 0;
-				for (int i = l - 1, j = 1; j <= l; j++, i--) {
+			intnum = 0;
+			if (zf == 0) {
+				for (int i = l - 1; i >= 0; i--) {
 					intnum = intnum * 10 + b[i] - '0';
 				}
 			} else {
-				id = 3;
-				a[0] = l;
+				for (int i = l - 1; i >= 1; i--) {
+					intnum = intnum * 10 + b[i] - '0';
+				}
+			}
+		} else {
+			printf("here\n");
+			id = 3;
+			a[0] = l;
+			///*
+			if (zf == 0) {
 				for (int i = l - 1, j = 1; j <= l; j++, i--) {
 					a[j] = b[i] - '0';
 				}
+				printf("id = %d\n", id);
+				for (int i = 0; i <= a[0]; i++) {
+					printf("%d", a[i]);
+				}
+				printf("\n");
+			} else {
+				for (int i = l - 1, j = 1; j < l; j++, i--) {
+					a[j] = b[i] - '0';
+				}
+				printf("id = %d\n", id);
+				for (int i = 0; i <= a[0]; i++) {
+					printf("%d", a[i]);
+				}
+				printf("\n");
 			}
-		}*/
+			//*/
+		}
 	}
 };
 
@@ -107,10 +135,12 @@ ostream& operator<<(ostream &os, const num &obj) {
 	} else if (obj.id == 2) {
 		os << obj.floatnum;
 	} else if (obj.id == 3) {
-		for (int i = obj.a[0]; i >= 1; i--) {
+		int p = obj.a[0], zf = obj.zf;
+		if (zf == 1) os << '-';
+		for (int i = p; i >= 1; i--) {
 			os << obj.a[i];
 		}
-		if (obj.a[0] == 0) cout << '0';
+		if (p == 0) os << 0;
 	}
 }
 
@@ -250,8 +280,10 @@ int main() {
 	cout << fairy << fairy.id << endl;
 	fairy = 120.000;
 	cout << fairy << fairy.id << endl;
-	string b = "12938012";
-	cout << b[4] << endl;
+	string b = "1293801124532134422";
+	fairy = b;
+	cout << fairy << fairy.id << endl;
+	return 0;
 	while (1) {
 		gets(forgets);
 		s += forgets;
