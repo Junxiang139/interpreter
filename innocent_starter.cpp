@@ -12,6 +12,7 @@ try to apply plus in integer
 #include<string>
 using namespace std;
 
+/*
 struct floatnum {
 	double value;
 	floatnum () {
@@ -61,21 +62,28 @@ struct intnum {
 		return b;
 	}
 };
+*/
 
-template <class T>
-class nums {
-	T a;
+struct num {
+	int id;//0 1 2
+	int intnum;
+	double floatnum;
+	int a[105];
 };
 
-template <class T>
-T getv(int v) {
-	intnum a;
-	floatnum b;
-	if (v == 1) return a;
-	else return b;
+ostream& operator<<(ostream &os, const num &obj) {
+	if (obj.id == 1) {
+		os << obj.intnum;
+	} else if (obj.id == 2) {
+		os << obj.floatnum;
+	} else if (obj.id == 3) {
+		for (int i = obj.a[0]; i >= 1; i--) {
+			os << obj.a[i];
+		}
+		if (obj.a[0] == 0) cout << '0';
+	}
 }
 
-nums<intnum> asdfg;
 /*
 template <typename T>
 void type (T a) {
@@ -94,11 +102,11 @@ floatnum cfloatnum(T a) {
 	}
 }
 */
-
+/*
 vector<intnum> intlist;    //rank % 3 = 0
 vector<floatnum> floatlist;//rank % 3 = 1
 vector<bignum> biglist;    //rank % 3 = 2
-
+*/
 int lbra = 0, rbra = 0;
 void calclr(string s) {
 	int len = s.length();
@@ -127,6 +135,8 @@ int numv(string s) {
 	}
 	return 0;
 }
+
+/*
 template <class T>
 T eplus(T a, T b) {
 	if (typeid(a) == typeid(floatnum) || typeid(b) == typeid(floatnum)) {
@@ -138,6 +148,10 @@ T eplus(T a, T b) {
 		c.value = a.value + b.value;
 		return c;
 	}
+}
+*/
+int eplus(int a, int b) {
+	return a + b;
 }
 int eminus(int a, int b) {
 	return a - b;
@@ -178,9 +192,7 @@ int getvalue(string s) {
 		int v1 = getvalue(s1), v2 = getvalue(s2);
 		switch(s[1]) {
 			case '+': {
-				intnum vv1, vv2;
-				vv1.value = v1, vv2.value = v2;
-				return eplus<intnum>(vv1, vv2).value;
+				return eplus(v1, v2);
 				break;
 			}
 			case '-':
@@ -198,15 +210,10 @@ int getvalue(string s) {
 	return 0;
 }
 int main() {
-	intnum a;
 	string s, s1;
 	s.clear();
 	char forgets[1005];
 	while (1) {
-		cout << a.value << endl;
-		int valve;
-		cin >> valve;
-		getv<floatnum>(valve);
 		gets(forgets);
 		s += forgets;
 		calclr(s);
