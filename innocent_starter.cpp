@@ -65,10 +65,40 @@ struct intnum {
 */
 
 struct num {
-	int id;//0 1 2
+	int id;//1 2 3
 	int intnum;
 	double floatnum;
 	vector<int> a;
+	num () {
+		id = intnum = 0;
+		floatnum = 0;
+		a.clear();
+	}
+	template <typename T>
+	num (T b) {
+		if (typeid(b) == typeid(int)) {
+			id = 1;
+			intnum = b;
+		} else if (typeid(b) == typeid(double)) {
+			id = 2;
+			floatnum = b;
+		}/* else if (typeid(b) == typeid(string)) {
+			int l = 8;
+			if (l < 9) {
+				id = 1;
+				intnum = 0;
+				for (int i = l - 1, j = 1; j <= l; j++, i--) {
+					intnum = intnum * 10 + b[i] - '0';
+				}
+			} else {
+				id = 3;
+				a[0] = l;
+				for (int i = l - 1, j = 1; j <= l; j++, i--) {
+					a[j] = b[i] - '0';
+				}
+			}
+		}*/
+	}
 };
 
 ostream& operator<<(ostream &os, const num &obj) {
@@ -213,6 +243,15 @@ int main() {
 	string s, s1;
 	s.clear();
 	char forgets[1005];
+	num fairy;
+	fairy = 3.1416;
+	cout << fairy << endl;
+	fairy = 120;
+	cout << fairy << fairy.id << endl;
+	fairy = 120.000;
+	cout << fairy << fairy.id << endl;
+	string b = "12938012";
+	cout << b[4] << endl;
 	while (1) {
 		gets(forgets);
 		s += forgets;
