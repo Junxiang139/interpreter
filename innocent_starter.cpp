@@ -64,6 +64,8 @@ struct intnum {
 };
 */
 
+num cfloat(const num &b);
+
 struct num {
 	int id;//1 2 3
 	int intnum;
@@ -128,13 +130,15 @@ struct num {
 		}
 	}
 	
-	num operator+(const num &b) const {
-		num a;
-		if (id == 1 && b.id == 1) {
+	num operator+(const num &c) const {
+		if (id == 1 && c.id == 1) {
+			num a;
 			a.id = 1;
-			a.intnum = intnum + b.intnum;
+			a.intnum = intnum + c.intnum;
 			return a;
-		} else if (id == 2 || b.id == 2) {
+		} else if (id == 2 || c.id == 2) {
+			num a, b;
+			a = cfloat(*this), b = cfloat(c);
 		} else {
 			
 		}
@@ -167,6 +171,22 @@ struct num {
 		}
 	}
 };
+
+num cfloat(const num &b) {
+	num a;
+	a.id = 2;
+	if (b.id == 1) {
+		a.floatnum = b.intnum;
+	} else if (b.id == 2) {
+		return b;
+	} else if (b.id == 3) {
+		for (int i = b.a[0]; i >= 1; i--) {
+			a.floatnum = a.floatnum * 10 + (b.a[i] - '0');
+		}
+		if (b.zf == 1) a.floatnum = -a.floatnum;
+	}
+	return a;
+}
 
 ostream& operator<<(ostream &os, const num &obj) {
 	if (obj.id == 1) {
