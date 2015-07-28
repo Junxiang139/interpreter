@@ -127,6 +127,45 @@ struct num {
 			//*/
 		}
 	}
+	
+	num operator+(const num &b) const {
+		num a;
+		if (id == 1 && b.id == 1) {
+			a.id = 1;
+			a.intnum = intnum + b.intnum;
+			return a;
+		} else if (id == 2 || b.id == 2) {
+		} else {
+			
+		}
+	}
+	
+	num operator-(const num &b) const {
+		num a;
+		if (id == 1 && b.id == 1) {
+			a.id = 1;
+			a.intnum = intnum - b.intnum;
+			return a;
+		}
+	}
+	
+	num operator*(const num &b) const {
+		num a;
+		if (id == 1 && b.id == 1) {
+			a.id = 1;
+			a.intnum = intnum * b.intnum;
+			return a;
+		}
+	}
+	
+	num operator/(const num &b) const {
+		num a;
+		if (id == 1 && b.id == 1) {
+			a.id = 1;
+			a.intnum = intnum / b.intnum;
+			return a;
+		}
+	}
 };
 
 ostream& operator<<(ostream &os, const num &obj) {
@@ -167,6 +206,7 @@ vector<intnum> intlist;    //rank % 3 = 0
 vector<floatnum> floatlist;//rank % 3 = 1
 vector<bignum> biglist;    //rank % 3 = 2
 */
+
 int lbra = 0, rbra = 0;
 void calclr(string s) {
 	int len = s.length();
@@ -177,23 +217,55 @@ void calclr(string s) {
 	}
 	return;
 }
+
 bool numon(string s) {
 	int len = s.length();
-	for (int i = 0; i < len; i++) {
-		if (s[i] < '0' || s[i] > '9') return 0;
+	int st = 0, dot = 0;
+	if (s[0] == '-') st = 1;
+	for (int i = st; i < len; i++) {
+		if (s[i] == '.') {
+			if (dot == 0) dot = 1;
+			else return 0;
+		} else {
+			if (s[i] < '0' || s[i] > '9') return 0;
+		}
 	}
 	return 1;
 }
-int numv(string s) {
+
+num numv(string s) {
 	int len = s.length();
-	if (len < 10) {
-		int v = 0;
-		for (int i = 0; i < len; i++) {
-			v = v * 10 + (s[i] - '0');
+	num v;
+	int dot = 0;
+	int st = 0;
+	if (s[0] == '-') st = 1;
+	for (int i = 0; i < len; i++) {
+		if (s[i] == '.') {
+			dot = 1;
+			break;
 		}
-		return v;
 	}
-	return 0;
+	if (dot) {
+		v.id = 2, v.floatnum = 0;
+		for (int i = st; i < len; i++) {
+			if (s[i] != '.') v.floatnum = v.floatnum * 10 + (s[i] - '0');
+		}
+		if (st == 1) v.floatnum = -v.floatnum;
+	} else if (len < 9) {
+		v.id = 1, v.intnum = 0;
+		for (int i = st; i < len; i++) {
+			v.intnum = v.intnum * 10 + (s[i] - '0');
+		}
+		if (st == 1) v.intnum = -v.intnum;
+	} else {
+		//v.a.clear();
+		if (st == 1) {v.zf = 1, v.a[0] = len - 1;}
+		else {v.zf = 0, v.a[0] = len;}
+		for (int i = st, j = v.a[0]; i < len; i++, j--) {
+			v.a[j] = s[i] - '0';
+		}
+	}
+	return v;
 }
 
 /*
@@ -210,16 +282,16 @@ T eplus(T a, T b) {
 	}
 }
 */
-int eplus(int a, int b) {
+num eplus(num a, num b) {
 	return a + b;
 }
-int eminus(int a, int b) {
+num eminus(num a, num b) {
 	return a - b;
 }
-int emulti(int a, int b) {
+num emulti(num a, num b) {
 	return a * b;
 }
-int divine(int a, int b) {
+num divine(num a, num b) {
 	return a / b;
 }
 int getnex(string s, int pos) {
@@ -239,7 +311,7 @@ int getnex(string s, int pos) {
 	}
 	return 0;
 }
-int getvalue(string s) {
+num getvalue(string s) {
 	if (numon(s)) return numv(s);
 	else {
 		int k1 = 2, k2 = getnex(s, 2), k3 = 0;
@@ -249,7 +321,7 @@ int getvalue(string s) {
 		///*
 		string s1 (s, k1 + 1, k2 - k1 - 1), s2 (s, k2 + 1, k3 - k2 - 1);
 		//cout << s1 << endl << s2 << endl;
-		int v1 = getvalue(s1), v2 = getvalue(s2);
+		num v1 = getvalue(s1), v2 = getvalue(s2);
 		switch(s[1]) {
 			case '+': {
 				return eplus(v1, v2);
@@ -283,7 +355,7 @@ int main() {
 	string b = "1293801124532134422";
 	fairy = b;
 	cout << fairy << fairy.id << endl;
-	return 0;
+	//return 0;
 	while (1) {
 		gets(forgets);
 		s += forgets;
