@@ -68,7 +68,7 @@ struct num {
 	int id;//0 1 2
 	int intnum;
 	double floatnum;
-	int a[105];
+	vector<int> a;
 };
 
 ostream& operator<<(ostream &os, const num &obj) {
