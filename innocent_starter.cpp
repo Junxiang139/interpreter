@@ -147,32 +147,15 @@ struct num {
 		}
 	}*/
 	
-	num operator-(const num &b) const {
-		num a;
-		if (id == 1 && b.id == 1) {
-			a.id = 1;
-			a.intnum = intnum - b.intnum;
-			return a;
-		}
-	}
+	num operator-(const num &b) const;
 	
-	num operator*(const num &b) const {
-		num a;
-		if (id == 1 && b.id == 1) {
-			a.id = 1;
-			a.intnum = intnum * b.intnum;
-			return a;
-		}
-	}
+	num operator*(const num &b) const;
 	
-	num operator/(const num &b) const {
-		num a;
-		if (id == 1 && b.id == 1) {
-			a.id = 1;
-			a.intnum = intnum / b.intnum;
-			return a;
-		}
-	}
+	num operator/(const num &b) const;
+	
+	bool operator==(const num &b) const;
+	
+	bool operator<(const num &b) const;
 };
 
 num cfloat(const num &b) {
@@ -201,6 +184,12 @@ num cbignum(const num &b) {
 		return b;
 	} else if (b.id == 1) {
 		int v = b.intnum, l = 0;
+		if (v < 0) {
+			a.zf = 1;
+			v = -v;
+		} else {
+			a.zf = 0;
+		}
 		while (v) {
 			l++;
 			a.a[l] = v % 10;
@@ -210,15 +199,133 @@ num cbignum(const num &b) {
 	}
 	return a;
 }
+bool num::operator==(const num &c) const {
+	num a = *this, b = c;
+	if (a.id == 1 && b.id == 1) {
+		return a.intnum == b.intnum;
+	} else if (a.id == 2 || b.id == 2) {
+		a = cfloat(a), b = cfloat(b);
+		return abs(a.floatnum - b.floatnum) < 0.0000001;
+	} else {
+		a = cbignum(a), b = cbignum(b);
+		if (a.zf != b.zf) return 0;
+		if (a.a[0] != b.a[0]) return 0;
+		for (int i = a.a[0]; i >= 1; i--) {
+			if (a.a[i] != b.a[i]) return 0;
+		}
+		return 1;
+	}
+}
+bool num::operator<(const num &c) const {
+	num a = *this, b = c;
+	if (a.id == 1 && b.id == 1) {
+		return a.intnum < b.intnum;
+	} else if (a.id == 2 || b.id == 2) {
+		a = cfloat(a), b = cfloat(b);
+		return a.floatnum < b.floatnum;
+	} else {
+		a = cbignum(a), b = cbignum(b);
+		if (a == b) return 0;
+		if (a.zf != b.zf) return a.zf > c.zf;
+		if (a.zf == 0) {
+			if (a.a[0] < b.a[0]) return 1;
+			if (a.a[0] > b.a[0]) return 0;
+			for (int i = a.a[0]; i >= 1; i--) {
+				if (a.a[i] < b.a[i]) return 1;
+				if (a.a[i] > b.a[i]) return 0;
+			}
+			return 0;
+		} else {
+			a.zf = 0, b.zf = 0;
+			return !(a < b);
+		}
+	}
+}
 
 num num::operator+(const num &c) const {
 	num a, b;
 	if (id == 1 && c.id == 1) {
 		a.id = 1;
 		a.intnum = intnum + c.intnum;
+		if (abs(a.intnum) > 1000000000) {
+			a = cbignum(a);
+		}
 	} else if (id == 2 || c.id == 2) {
 		a = cfloat(*this), b = cfloat(c);
 		a.floatnum += b.floatnum;
+	} else {
+		a = cbignum(*this), b = cbignum(c);
+		if (a.zf == b.zf) {
+			a.a[0] = max(a.a[0], b.a[0]);
+			int k = 0;
+			for (int i = 1; i <= a.a[0]; i++) {
+				a.a[i] += b.a[i] + k;
+				if (a.a[i] >= 10) {
+					a.a[i] -= 10;
+					k = 1;
+				} else k = 0;
+			}
+			if (k) {
+				a.a[++a.a[0]] = 1;
+			}
+		} else {
+			num d;
+			d = b;
+			d.zf = (!d.zf);
+			a = a - d;
+		}
+	}
+	return a;
+}
+
+num num::operator-(const num &c) const {
+	num a, b;
+	if (id == 1 && c.id == 1) {
+		a.id = 1;
+		a.intnum = intnum - c.intnum;
+		if (abs(a.intnum) > 1000000000) {
+			a = cbignum(a);
+		}
+	} else if (id == 2 || c.id == 2) {
+		a = cfloat(*this), b = cfloat(c);
+		a.floatnum -= b.floatnum;
+	} else {
+		a = cbignum(*this), b = cbignum(c);
+	}
+	return a;
+}
+
+num num::operator*(const num &c) const {
+	num a, b;
+	if (id == 1 && c.id == 1) {
+		a.id = 1;
+		long long v;
+		v = (long long)intnum * c.intnum;
+		if (abs(v) > 1000000000ll) {
+			num a1, b1;
+			a1 = cbignum(*this), b1 = cbignum(c);
+			a = a1 * b1;
+			return a;
+		} else {
+			a.intnum = intnum * c.intnum;
+		}
+	} else if (id == 2 || c.id == 2) {
+		a = cfloat(*this), b = cfloat(c);
+		a.floatnum *= b.floatnum;
+	} else {
+		a = cbignum(*this), b = cbignum(c);
+	}
+	return a;
+}
+
+num num::operator/(const num &c) const {
+	num a, b;
+	if (id == 1 && c.id == 1) {
+		a.id = 1;
+		a.intnum = intnum / c.intnum;
+	} else if (id == 2 || c.id == 2) {
+		a = cfloat(*this), b = cfloat(c);
+		a.floatnum /= b.floatnum;
 	} else {
 		a = cbignum(*this), b = cbignum(c);
 	}
