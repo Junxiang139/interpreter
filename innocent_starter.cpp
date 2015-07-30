@@ -496,6 +496,7 @@ T eplus(T a, T b) {
 	}
 }
 */
+/*
 num eplus(num a, num b) {
 	//printf("id %d %d\n", a.id, b.id);
 	return a + b;
@@ -509,6 +510,7 @@ num emulti(num a, num b) {
 num divine(num a, num b) {
 	return a / b;
 }
+*/
 int getnex(string s, int pos) {
 	int l = 1, r = 0, len = s.length();
 	pos++;
@@ -539,17 +541,49 @@ num getvalue(string s) {
 		num v1 = getvalue(s1), v2 = getvalue(s2);
 		switch(s[1]) {
 			case '+': {
-				return eplus(v1, v2);
+				v1 = v1 + v2;
+				while (s[k3] == ' ') {
+					k2 = k3;
+					k3 = getnex(s, k2);
+					s2.assign(s, k2 + 1, k3 - k2 - 1);
+					v2 = getvalue(s2);
+					v1 = v1 + v2;
+				}
+				return v1;
 				break;
 			}
 			case '-':
-				return eminus(v1, v2);
+				v1 = v1 - v2;
+				while (s[k3] == ' ') {
+					k2 = k3;
+					k3 = getnex(s, k2);
+					s2.assign(s, k2 + 1, k3 - k2 - 1);
+					v2 = getvalue(s2);
+					v1 = v1 - v2;
+				}
+				return v1;
 				break;
 			case '*':
-				return emulti(v1, v2);
+				v1 = v1 * v2;
+				while (s[k3] == ' ') {
+					k2 = k3;
+					k3 = getnex(s, k2);
+					s2.assign(s, k2 + 1, k3 - k2 - 1);
+					v2 = getvalue(s2);
+					v1 = v1 * v2;
+				}
+				return v1;
 				break;
 			case '/':
-				return divine(v1, v2);
+				v1 = v1 / v2;
+				while (s[k3] == ' ') {
+					k2 = k3;
+					k3 = getnex(s, k2);
+					s2.assign(s, k2 + 1, k3 - k2 - 1);
+					v2 = getvalue(s2);
+					v1 = v1 / v2;
+				}
+				return v1;
 				break;
 		}
 		//*/
