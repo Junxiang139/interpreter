@@ -69,10 +69,12 @@ struct num {
 	int intnum;
 	double floatnum;
 	bool zf;
-	int a[105];
+	int a[105] = {0};
 	num () {
-		id = intnum = 0;
+		id = 1;
+		intnum = 0;
 		floatnum = 0;
+		zf = 0;
 		//a.clear();
 	}
 	num (int b) {
@@ -269,15 +271,55 @@ num num::operator+(const num &c) const {
 				a.a[++a.a[0]] = 1;
 			}
 		} else {
-			num d;
-			d = b;
-			d.zf = (!d.zf);
-			a = a - d;
+			b.zf = !(b.zf);//a - b
+			if (a == b) {
+				num d;
+				a = d;
+			} else {
+				int mark = 0;
+				if (a.zf == 1) {
+					mark = 1;
+					a.zf = 0, b.zf = 0;
+				}
+				if (b < a) {
+					int i, k = 0;
+					for (int i = 1; i <= b.a[0]; i++) {
+						a.a[i] = a.a[i] - b.a[i] - k;
+						if (a.a[i] < 0) {
+							a.a[i] += 10;
+							k = 1;
+						} else {
+							k = 0;
+						}
+					}
+					for (int i = b.a[0] + 1; k; i++) {
+						a.a[i] -= k;
+						if (a.a[i] < 0) {
+							a.a[i] += 10;
+							k = 1;
+						} else {
+							k = 0;
+						}
+					}
+					while (a.a[a.a[0]] == 0) {
+						a.a[0]--;
+					}
+				} else {
+					num d;
+					b.zf = !(b.zf);
+					d = b + a;
+					//d.zf = !(d.zf);
+					a = d;
+				}
+				if (mark) {
+					a.zf = !(a. zf);
+				}
+			}
 		}
 	}
 	return a;
 }
-
+//100000000000000000000
 num num::operator-(const num &c) const {
 	num a, b;
 	if (id == 1 && c.id == 1) {
@@ -291,6 +333,8 @@ num num::operator-(const num &c) const {
 		a.floatnum -= b.floatnum;
 	} else {
 		a = cbignum(*this), b = cbignum(c);
+		b.zf = !(b.zf);
+		a = a + b;
 	}
 	return a;
 }
