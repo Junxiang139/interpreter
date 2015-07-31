@@ -65,16 +65,18 @@ struct intnum {
 */
 
 struct num {
-	int id;//1 2 3
+	int id;//1 2 3 4
 	int intnum;
 	double floatnum;
 	bool zf;
 	int a[105] = {0};
+	int fz, fm;
 	num () {
 		id = 1;
 		intnum = 0;
 		floatnum = 0;
 		zf = 0;
+		fz = fm = 0;
 		//a.clear();
 	}
 	num (int b) {
@@ -175,6 +177,8 @@ num cfloat(const num &b) {
 		}
 		if (b.zf == 1) a.floatnum = -a.floatnum;
 		//printf("v %f\n", a.floatnum);
+	} else if (b.id == 4) {
+		a.floatnum = double(b.fz) / double(b.fm);
 	}
 	return a;
 }
@@ -201,11 +205,42 @@ num cbignum(const num &b) {
 	}
 	return a;
 }
+
+num reduct(const num &b) {
+	num a = b;
+	if (a.id == 4) {
+		int q = __gcd(a.fz, a.fm);
+		if (q != 1) {
+			a.fz /= q, a.fm /= q;
+		}
+		if (a.fm == 1) {
+			a.id = 1;
+			a.intnum = a.fz;
+		}
+	}
+	return a;
+}
+
+num cfranum(const num &b) {
+	if (b.id == 4) {
+		return b;
+	}
+	num a = b;
+	if (b.id == 1) {
+		a.id = 4;
+		a.fz = b.intnum;
+		a.fm = 1;
+	}
+	return a;
+}
 bool num::operator==(const num &c) const {
 	num a = *this, b = c;
 	if (a.id == 1 && b.id == 1) {
 		return a.intnum == b.intnum;
-	} else if (a.id == 2 || b.id == 2) {
+	} else if ((a.id == 1 || a.id == 4) && (b.id == 1 || b.id == 4)) {
+		a = cfranum(a), b = cfranum(b);
+		return (a.fz == b.fz && a.fm == b.fm);
+	} else if (a.id == 2 || a.id == 4 || b.id == 2 || b.id == 4) {
 		a = cfloat(a), b = cfloat(b);
 		return abs(a.floatnum - b.floatnum) < 0.0000001;
 	} else {
@@ -222,7 +257,10 @@ bool num::operator<(const num &c) const {
 	num a = *this, b = c;
 	if (a.id == 1 && b.id == 1) {
 		return a.intnum < b.intnum;
-	} else if (a.id == 2 || b.id == 2) {
+	} else if ((a.id == 1 || a.id == 4) && (b.id == 1 || b.id == 4)) {
+		a = cfranum(a), b = cfranum(b);
+		return (double(a.fz) / double(a.fm)) < (double(b.fz) / double(b.fm));
+	} else if (a.id == 2 || a.id == 4 || b.id == 2 || b.id == 4) {
 		a = cfloat(a), b = cfloat(b);
 		return a.floatnum < b.floatnum;
 	} else {
@@ -252,7 +290,32 @@ num num::operator+(const num &c) const {
 		if (abs(a.intnum) > 1000000000) {
 			a = cbignum(a);
 		}
-	} else if (id == 2 || c.id == 2) {
+	} else if ((id == 1 || id == 4) && (c.id == 1 || c.id == 4)) {
+		a = (*this), b = c;
+		a = cfranum(a), b = cfranum(b);
+		if (a.fm == b.fm) {
+			a.fz += b.fz;
+			if (abs(a.fz) > 1000000000) {
+				a = cfloat(a);
+			} else if (a.fz == 0) {
+				a.id = 1;
+				a.intnum = 0;
+			} else {
+				a = reduct(a);
+			}
+		} else {
+			long long vz, vm;
+			vz = (long long)a.fz * b.fm + (long long)b.fz * a.fm;
+			vm = (long long)a.fm * b.fm;
+			if (abs(vz) > 1000000000ll || abs(vm) > 1000000000ll) {
+				a = cfloat(a), b = cfloat(b);
+				a = a + b;
+			} else {
+				a.fz = (int)vz, a.fm = (int)vm;
+				a = reduct(a);
+			}
+		}
+	} else if (id == 2 || id == 4 || c.id == 2 || c.id == 4) {
 		a = cfloat(*this), b = cfloat(c);
 		a.floatnum += b.floatnum;
 	} else {
@@ -328,7 +391,11 @@ num num::operator-(const num &c) const {
 		if (abs(a.intnum) > 1000000000) {
 			a = cbignum(a);
 		}
-	} else if (id == 2 || c.id == 2) {
+	} else if ((id == 1 || id == 4) && (c.id == 1 || c.id == 4)) {
+		a = cfranum(*this), b = cfranum(c);
+		b.fz = -b.fz;
+		a = a + b;
+	} else if (id == 2 || id == 4 || c.id == 2 || c.id == 4) {
 		a = cfloat(*this), b = cfloat(c);
 		a.floatnum -= b.floatnum;
 	} else {
@@ -353,7 +420,24 @@ num num::operator*(const num &c) const {
 		} else {
 			a.intnum = intnum * c.intnum;
 		}
-	} else if (id == 2 || c.id == 2) {
+	} else if ((id == 1 || id == 4) && (c.id == 1 || c.id == 4)) {
+		a = cfranum(*this), b = cfranum(c);
+		long long vz, vm;
+		vz = (long long)a.fz * b.fz;
+		vm = (long long)a.fm * b.fm;
+		if (abs(vz) > 1000000000ll || abs(vm) > 1000000000ll) {
+			a = cfloat(a), b = cfloat(b);
+			a = a * b;
+		} else {
+			a.fz = (int)vz, a.fm = (int)vm;
+			if (a.fz == 0) {
+				a.id = 1;
+				a.intnum = 0;
+			} else {
+				a = reduct(a);
+			}
+		}
+	} else if (id == 2 || id == 4 || c.id == 2 || c.id == 4) {
 		a = cfloat(*this), b = cfloat(c);
 		a.floatnum *= b.floatnum;
 	} else {
@@ -387,9 +471,16 @@ num num::operator*(const num &c) const {
 num num::operator/(const num &c) const {
 	num a, b;
 	if (id == 1 && c.id == 1) {
-		a.id = 1;
-		a.intnum = intnum / c.intnum;
-	} else if (id == 2 || c.id == 2) {
+		a.id = 4;
+		a.fz = intnum;
+		a.fm = c.intnum;
+		a = reduct(a);
+	} else if ((id == 1 || id == 4) && (c.id == 1 || c.id == 4)) {
+		a = cfranum(*this), b = cfranum(c);
+		int k = b.fm;
+		b.fm = b.fz, b.fz = k;
+		a = a * b;
+	} else if (id == 2 || id == 4 || c.id == 2 || c.id == 4) {
 		a = cfloat(*this), b = cfloat(c);
 		a.floatnum /= b.floatnum;
 	} else {
@@ -411,6 +502,8 @@ ostream& operator<<(ostream &os, const num &obj) {
 			os << obj.a[i];
 		}
 		if (p == 0) os << 0;
+	} else if (obj.id == 4) {
+		os << obj.fz << '/' << obj.fm;
 	}
 }
 
@@ -617,6 +710,7 @@ int main() {
 	string s, s1;
 	s.clear();
 	char forgets[1005];
+	//printf("%d\n", __gcd(12, 27));
 	/*
 	num fairy;
 	fairy = 3.1416;
