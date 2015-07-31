@@ -358,10 +358,32 @@ num num::operator*(const num &c) const {
 		a.floatnum *= b.floatnum;
 	} else {
 		a = cbignum(*this), b = cbignum(c);
+		int l = a.a[0] + b.a[0] - 1;
+		num d;
+		d.id = 3;
+		for (int i = 1; i <= a.a[0]; i++) {
+			for (int j = 1; j <= b.a[0]; j++) {
+				d.a[i + j - 1] += a.a[i] * b.a[j];
+			}
+		}
+		int k = 0;
+		for (int i = 1; i <= l; i++) {
+			d.a[i] += k;
+			if (d.a[i] >= 10) {
+				k = d.a[i] / 10;
+				d.a[i] %= 10;
+			} else k = 0;
+		}
+		while (k) {
+			d.a[++l] += k % 10;
+			k /= 10;
+		}
+		d.a[0] = l;
+		a = d;
 	}
 	return a;
 }
-
+//1238109823420938 1238109823420938
 num num::operator/(const num &c) const {
 	num a, b;
 	if (id == 1 && c.id == 1) {
@@ -371,7 +393,8 @@ num num::operator/(const num &c) const {
 		a = cfloat(*this), b = cfloat(c);
 		a.floatnum /= b.floatnum;
 	} else {
-		a = cbignum(*this), b = cbignum(c);
+		a = cfloat(*this), b = cfloat(c);
+		a = a / b;
 	}
 	return a;
 }
@@ -610,6 +633,7 @@ int main() {
 	while (1) {
 		gets(forgets);
 		s += forgets;
+		if (s == "Requiescat in pace") break;
 		calclr(s);
 		if (lbra != rbra) continue;
 		//define
@@ -622,7 +646,6 @@ int main() {
 		cout << getvalue(s) << endl;
 		s.clear();
 	}
-	system("pause");
 	return 0;
 }
 /*
