@@ -71,6 +71,7 @@ struct num {
 	bool zf;
 	int a[105] = {0};
 	int fz, fm;
+	string name;
 	num () {
 		id = 1;
 		intnum = 0;
@@ -136,6 +137,25 @@ struct num {
 		}
 	}
 	
+	num &operator=(const num &c) { //不复制变量名 
+		if (this == &c) return *this;
+		id = c.id;
+		if (id == 1) {
+			intnum = c.intnum;
+			//return 0;
+		} else if (id == 2) {
+			floatnum = c.floatnum;
+		} else if (id == 3) {
+			zf = c.zf;
+			for (int i = 0; i <= c.a[0]; i++) {
+				a[i] = c.a[i];
+			}
+		} else if (id == 4) {
+			fz = c.fz, fm = c.fm;
+		}
+		return *this;
+	}
+	
 	num operator+(const num &c) const;
 	/* {
 		if (id == 1 && c.id == 1) {
@@ -161,6 +181,9 @@ struct num {
 	
 	bool operator<(const num &b) const;
 };
+
+num var[105];
+int tot = 0;
 
 num cfloat(const num &b) {
 	num a;
@@ -644,9 +667,19 @@ int getnex(string s, int pos) {
 	}
 	return 0;
 }
+int findname(string s) {
+	for (int i = 1; i <= tot; i++) {
+		if (var[i].name == s) {
+			return i;
+		}
+	}
+	return 0;
+}
 num getvalue(string s) {
 	if (numon(s)) return numv(s);
-	else {
+	else if (findname(s)) {
+		return var[findname(s)];
+	} else {
 		int k1 = 2, k2 = getnex(s, 2), k3 = 0;
 		k3 = getnex(s, k2);
 		//cout << k2 << ' ' << k3 << endl;
@@ -710,6 +743,8 @@ int main() {
 	string s, s1;
 	s.clear();
 	char forgets[1005];
+	num a, b;
+	a = b;
 	//printf("%d\n", __gcd(12, 27));
 	/*
 	num fairy;
@@ -734,11 +769,31 @@ int main() {
 		if (s.length() >= 8) {
 			string s2 (s, 1, 6);
 			if (s2 == "define") {
-				continue;
+				int k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
+				if (s[k1 + 1] == '(') {
+					continue;
+				}
+				tot++;
+				s2.assign(s, k1 + 1, k2 - k1 - 1);
+				var[tot].name = s2;
+				s2.assign(s, k2 + 1, k3 - k2 - 1);
+				//cout << getvalue(s2) << endl;
+				var[tot] = getvalue(s2);
+				//cout << getvalue(s2) << endl;
+				s.clear();
+			} else {
+				cout << getvalue(s) << endl;
+				s.clear();
 			}
+		} else {
+			cout << getvalue(s) << endl;
+			s.clear();
 		}
-		cout << getvalue(s) << endl;
-		s.clear();
+		/*
+		if (tot == 2) {
+			cout << var[1] << ' ' << var[2] << endl;
+		}
+		*/
 	}
 	return 0;
 }
