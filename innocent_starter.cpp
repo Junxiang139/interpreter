@@ -64,6 +64,10 @@ struct intnum {
 };
 */
 
+string func[1005];
+string fname[1005];
+int ftot = 0;
+
 struct num {
 	int id;//1 2 3 4
 	int intnum;
@@ -182,7 +186,7 @@ struct num {
 	bool operator<(const num &b) const;
 };
 
-num var[105];
+num var[3005];
 int tot = 0;
 
 num cfloat(const num &b) {
@@ -679,7 +683,7 @@ num getvalue(string s) {
 	if (numon(s)) return numv(s);
 	else if (findname(s)) {
 		return var[findname(s)];
-	} else {
+	} else if (s[1] == '+' || s[1] == '-' || s[1] == '*' || s[1] == '/') {
 		int k1 = 2, k2 = getnex(s, 2), k3 = 0;
 		k3 = getnex(s, k2);
 		//cout << k2 << ' ' << k3 << endl;
@@ -736,6 +740,8 @@ num getvalue(string s) {
 				break;
 		}
 		//*/
+	} else {
+		
 	}
 	return 0;
 }
@@ -771,6 +777,9 @@ int main() {
 			if (s2 == "define") {
 				int k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
 				if (s[k1 + 1] == '(') {
+					func[++ftot] = s;
+					k1 = 1, k2 = getnex(s, k1);
+					fname[ftot].assign(s, k1 + 1, k2 - k1 - 1);
 					continue;
 				}
 				tot++;
