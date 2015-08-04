@@ -679,69 +679,48 @@ int findname(string s) {
 	}
 	return 0;
 }
-num getvalue(string s) {
-	if (numon(s)) return numv(s);
-	else if (findname(s)) {
-		return var[findname(s)];
-	} else if (s[1] == '+' || s[1] == '-' || s[1] == '*' || s[1] == '/') {
-		int k1 = 2, k2 = getnex(s, 2), k3 = 0;
-		k3 = getnex(s, k2);
-		//cout << k2 << ' ' << k3 << endl;
-		//cout << s << endl << s[k1] << s[k2] << s[k3] << endl;
-		///*
-		string s1 (s, k1 + 1, k2 - k1 - 1), s2 (s, k2 + 1, k3 - k2 - 1);
-		//cout << s1 << endl << s2 << endl;
-		num v1 = getvalue(s1), v2 = getvalue(s2);
-		switch(s[1]) {
-			case '+': {
-				v1 = v1 + v2;
-				while (s[k3] == ' ') {
-					k2 = k3;
-					k3 = getnex(s, k2);
-					s2.assign(s, k2 + 1, k3 - k2 - 1);
-					v2 = getvalue(s2);
-					v1 = v1 + v2;
-				}
-				return v1;
-				break;
-			}
-			case '-':
-				v1 = v1 - v2;
-				while (s[k3] == ' ') {
-					k2 = k3;
-					k3 = getnex(s, k2);
-					s2.assign(s, k2 + 1, k3 - k2 - 1);
-					v2 = getvalue(s2);
-					v1 = v1 - v2;
-				}
-				return v1;
-				break;
-			case '*':
-				v1 = v1 * v2;
-				while (s[k3] == ' ') {
-					k2 = k3;
-					k3 = getnex(s, k2);
-					s2.assign(s, k2 + 1, k3 - k2 - 1);
-					v2 = getvalue(s2);
-					v1 = v1 * v2;
-				}
-				return v1;
-				break;
-			case '/':
-				v1 = v1 / v2;
-				while (s[k3] == ' ') {
-					k2 = k3;
-					k3 = getnex(s, k2);
-					s2.assign(s, k2 + 1, k3 - k2 - 1);
-					v2 = getvalue(s2);
-					v1 = v1 / v2;
-				}
-				return v1;
-				break;
+int findfunc(string s) {
+	for (int i = 1; i <= ftot; i++) {
+		if (fname[i] == s) {
+			return i;
 		}
-		//*/
+	}
+	return 0;
+}
+bool isop(char c) {
+	 return c == '+' || c == '-' || c == '*' || c == '/';
+}
+num calcv(num a, num b, char c) {
+	if (c == '+') return a + b;
+	else if (c == '-') return a - b;
+	else if (c == '*') return a * b;
+	else if (c == '/') return a / b;
+	return a;
+}
+num getvalue(string s) {
+	if (numon(s)) {
+		return numv(s);
+	} else if (findname(s)) {
+		return var[findname(s)];
+	} else if (isop(s[1])) {
+		int k1 = 2, k2 = getnex(s, k1), k3 = getnex(s, k2);
+		string s1 (s, k1 + 1, k2 - k1 - 1), s2 (s, k2 + 1, k3 - k2 - 1);
+		num v1 = getvalue(s1), v2 = getvalue(s2);
+		v1 = calcv(v1, v2, s[1]);
+		while (s[k3] == ' ') {
+			k2 = k3;
+			k3 = getnex(s, k2);
+			s2.assign(s, k2 + 1, k3 - k2 - 1);
+			v2 = getvalue(s2);
+			v1 = calcv(v1, v2, s[1]);
+		}
+		return v1;
 	} else {
-		
+		int k1 = 1, k2 = getnex(s, k1), k3 = getnex(s, k2);
+		string s1 (s, k1, k2 - k1), s2 (s, k2 + 1, k3 - k2 - 1), sf;
+		//cout << s1 << endl << s2 << endl;
+		sf = func[findfunc(s1)];
+		cout << sf << endl;
 	}
 	return 0;
 }
@@ -777,9 +756,13 @@ int main() {
 			if (s2 == "define") {
 				int k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
 				if (s[k1 + 1] == '(') {
-					func[++ftot] = s;
-					k1 = 1, k2 = getnex(s, k1);
-					fname[ftot].assign(s, k1 + 1, k2 - k1 - 1);
+					k1 = 9, k2 = getnex(s, k1);
+					ftot++;
+					fname[ftot].assign(s, k1, k2 - k1);
+					k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
+					func[ftot].assign(s, k2 + 1, k3 - k2 - 1);
+					cout << fname[ftot] << endl << func[ftot] << endl;
+					s.clear();
 					continue;
 				}
 				tot++;
@@ -808,4 +791,9 @@ int main() {
 }
 /*
 (+ (+ 1 2) 3)
+(define (square x) (* x x))
+(square 21)
+441
+(sqaure (square 4))
+256
 */
