@@ -64,10 +64,6 @@ struct intnum {
 };
 */
 
-string func[1005];
-string fname[1005];
-int ftot = 0;
-
 struct num {
 	int id;//1 2 3 4
 	int intnum;
@@ -188,6 +184,8 @@ struct num {
 
 num var[3005];
 int tot = 0;
+num pvar[3005];
+int ptot = 0;
 
 num cfloat(const num &b) {
 	num a;
@@ -679,9 +677,9 @@ int findname(string s) {
 	}
 	return 0;
 }
-int findfunc(string s) {
-	for (int i = 1; i <= ftot; i++) {
-		if (fname[i] == s) {
+int findpname(string s, int pl, int pr) {
+	for (int i = pl + 1; i <= pr; i++) {
+		if (pvar[i].name == s) {
 			return i;
 		}
 	}
@@ -697,33 +695,98 @@ num calcv(num a, num b, char c) {
 	else if (c == '/') return a / b;
 	return a;
 }
-num getvalue(string s) {
+
+string fname[1005];
+string fmat[1005];
+string func[1005];
+int ftot = 0;
+/*
+(define (square x) (* x x))
+square
+(square x)
+(* x x)
+
+(define (sqrt) 5)
+sqrt
+(sqrt)
+5
+*/
+
+int findfunc(string s) {
+	for (int i = 1; i <= ftot; i++) {
+		if (fname[i] == s) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+//num pvar[3005];
+//int ptot = 0;
+num getvalue(string s, int yl = 0, int yr = 0) {
 	if (numon(s)) {
 		return numv(s);
+	} else if (yr > yl && findpname(s, yl, yr)) {
+		return pvar[findpname(s, yl, yr)];
 	} else if (findname(s)) {
 		return var[findname(s)];
 	} else if (isop(s[1])) {
 		int k1 = 2, k2 = getnex(s, k1), k3 = getnex(s, k2);
 		string s1 (s, k1 + 1, k2 - k1 - 1), s2 (s, k2 + 1, k3 - k2 - 1);
-		num v1 = getvalue(s1), v2 = getvalue(s2);
+		num v1 = getvalue(s1, yl, yr), v2 = getvalue(s2, yl, yr);
 		v1 = calcv(v1, v2, s[1]);
 		while (s[k3] == ' ') {
 			k2 = k3;
 			k3 = getnex(s, k2);
 			s2.assign(s, k2 + 1, k3 - k2 - 1);
-			v2 = getvalue(s2);
+			v2 = getvalue(s2, yl, yr);
 			v1 = calcv(v1, v2, s[1]);
 		}
 		return v1;
 	} else {
-		int k1 = 1, k2 = getnex(s, k1), k3 = getnex(s, k2);
-		string s1 (s, k1, k2 - k1), s2 (s, k2 + 1, k3 - k2 - 1), sf;
-		//cout << s1 << endl << s2 << endl;
-		sf = func[findfunc(s1)];
-		cout << sf << endl;
+		int k1 = 1, k2 = getnex(s, k1), k3;
+		int fr = 0;
+		string s1 (s, k1, k2 - k1), s2;
+		//cout << "s1 " << s1 << endl;
+		fr = findfunc(s1);
+		
+		//define var
+		int pl = ptot, pr;//range of ptot
+		string y = fmat[fr];//(square x)
+		string y1;
+		//cout << "y " << y << endl;
+		int x1 = 0, x2 = getnex(y, x1);
+		//cout << y[x1] << y[x2] << '?' << endl;
+		while (y[x2] == ' ') {
+			x1 = x2, x2 = getnex(y, x1);
+			y1.assign(y, x1 + 1, x2 - x1 - 1);
+			ptot++, pr = ptot;
+			pvar[pr].name = y1;
+		//	cout << "var " << y1 << endl;
+		}
+		
+		//getvalue(every element);
+		if (pr > pl) {
+			for (int i = pl + 1; i <= pr; i++) {
+				k1 = k2, k2 = getnex(s, k1);
+				s1.assign(s, k1 + 1, k2 - k1 - 1);
+		//		cout << "shi " << s1 << endl;
+				pvar[i] = getvalue(s1, yl, yr);
+			}
+		}
+
+//(jie x) (* x (jie (- x 1))
+//jie
+
+		string z = func[fr];//(* x x)
+		//cout << "func " << z << endl;
+		if (pr > pl) return getvalue(z, pl, pr);
+		else return getvalue(z);
+		//cout << sf << endl;
 	}
 	return 0;
 }
+
 int main() {
 	string s, s1;
 	s.clear();
@@ -751,6 +814,7 @@ int main() {
 		calclr(s);
 		if (lbra != rbra) continue;
 		//define
+		ptot = 0;
 		if (s.length() >= 8) {
 			string s2 (s, 1, 6);
 			if (s2 == "define") {
@@ -760,8 +824,9 @@ int main() {
 					ftot++;
 					fname[ftot].assign(s, k1, k2 - k1);
 					k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
+					fmat[ftot].assign(s, k1 + 1, k2 - k1 - 1);
 					func[ftot].assign(s, k2 + 1, k3 - k2 - 1);
-					cout << fname[ftot] << endl << func[ftot] << endl;
+				//	cout << fname[ftot] << endl << fmat[ftot] << endl << func[ftot] << endl;
 					s.clear();
 					continue;
 				}
