@@ -750,8 +750,8 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 	if (numon(s)) {
 		return numv(s);
 	} else if (yr > yl && findpname(s, yl, yr)) {
-		cout << "why?!" << endl;
-		cout << pvar[findpname(s, yl, yr)] << endl;
+		//cout << "why?!" << endl;
+		//cout << pvar[findpname(s, yl, yr)] << endl;
 		return pvar[findpname(s, yl, yr)];
 	} else if (findname(s)) {
 		return var[findname(s)];
@@ -762,9 +762,9 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		v3 = v1;
 		v1 = calcv(v3, v2, s[1]);
 		if (s[1] == '=') {
-			cout << "v1 v2 " << v3 << ' ' << v2 << endl;
-			cout << "TF? " << v1 << endl;
-			cout << "TFF?! " << (v3 == v2) << endl;
+		//	cout << "v1 v2 " << v3 << ' ' << v2 << endl;
+		//	cout << "TF? " << v1 << endl;
+		//	cout << "TFF?! " << (v3 == v2) << endl;
 			return v1;
 		}
 		while (s[k3] == ' ') {
@@ -780,23 +780,23 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		int fr = 0;
 		string s1 (s, k1, k2 - k1), s2;
 		if (s1 == "if") {
-			cout << "here" << endl;
+		//	cout << "here" << endl;
 			k1 = k2, k2 = getnex(s, k1);
 			s1.assign(s, k1 + 1, k2 - k1 - 1);
-			cout << "s1 " << s1 << endl;
-			system("pause");
+		//	cout << "s1 " << s1 << endl;
+		//	system("pause");
 			num d = getvalue(s1, yl, yr);
-			cout << "yl yr " << yl << ' ' << yr << endl;
-			cout << "pvar[vr] " << pvar[yr] << endl;
-			cout << "d " << d << endl;
+		//	cout << "yl yr " << yl << ' ' << yr << endl;
+		//	cout << "pvar[vr] " << pvar[yr] << endl;
+		//	cout << "d " << d << endl;
 			k1 = k2, k2 = getnex(s, k1);
 			if (d == fals) {
 				k1 = k2, k2 = getnex(s, k1);
-				cout << "go" << endl;
-				system("pause");
+		//		cout << "go" << endl;
+		//		system("pause");
 			}
 			s1.assign(s, k1 + 1, k2 - k1 - 1);
-			cout << "s1-2 " << s1 << endl;
+		//	cout << "s1-2 " << s1 << endl;
 			return getvalue(s1, yl, yr);
 		}
 		//cout << "s1 " << s1 << endl;
@@ -812,7 +812,7 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		while (y[x2] == ' ') {
 			x1 = x2, x2 = getnex(y, x1);
 			y1.assign(y, x1 + 1, x2 - x1 - 1);
-			cout << "y1 " << y1 << endl;
+		//	cout << "y1 " << y1 << endl;
 			ptot++, pr = ptot;
 			pvar[pr].name = y1;
 		//	cout << "var " << y1 << endl;
@@ -825,8 +825,8 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 				s1.assign(s, k1 + 1, k2 - k1 - 1);
 		//		cout << "shi " << s1 << endl;
 				pvar[i] = getvalue(s1, yl, yr);
-				cout << "pvar " << pvar[i] << endl;
-				cout << "name " << pvar[i].name << endl;
+		//		cout << "pvar " << pvar[i] << endl;
+		//		cout << "name " << pvar[i].name << endl;
 			}
 		}
 
@@ -847,7 +847,7 @@ int main() {
 	s.clear();
 	char forgets[1005];
 	num a = 1, b = 1.0;
-	cout << calcv(a, b, '=') << endl;
+	//cout << calcv(a, b, '=') << endl;
 	//printf("%d\n", __gcd(12, 27));
 	/*
 	num fairy;
@@ -872,6 +872,27 @@ int main() {
 		gets(forgets);
 		s += forgets;
 		if (s == "Requiescat in pace") break;
+		bool dd = 1;
+		string::iterator ti, it;
+		it = s.begin();
+		while (*it == ' ' && !s.empty()) {
+			s.erase(it);
+		}
+		ti = s.end() - 1;
+		while (*ti == ' ' && !s.empty()) {
+			s.erase(ti);
+			ti--;
+		}
+		if (!s.empty()) {
+			for (ti = s.begin(), it = ti + 1; it != s.end(); ti = it, it++) {
+				if (*it == '"') dd = !dd;
+				if (dd && (*ti) == ' ' && (*it) == ' ') {
+					s.erase(ti);
+					it--;
+					//cout << *ti << *it << "h\n";
+				}
+			}
+		}
 		calclr(s);
 		if (lbra != rbra) continue;
 		//define
@@ -924,4 +945,8 @@ int main() {
 256
 (define (jie n) (if (= n 1) n (* n (jie (- n 1)))))
 (jie 6)
+
+(define (fib n) (if (= n 0) 0 (if (= n 1) 1 (+ (fib (- n 1)) (fib (- n 2))))))
+
+0 1 1 2 3 5 8 13 21 34 55
 */
