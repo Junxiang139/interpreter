@@ -65,12 +65,13 @@ struct intnum {
 */
 
 struct num {
-	int id;//1 2 3 4
+	int id;//1 2 3 4 5 int float high fraction #t#f
 	int intnum;
 	double floatnum;
 	bool zf;
 	int a[105] = {0};
 	int fz, fm;
+	bool tf;
 	string name;
 	num () {
 		id = 1;
@@ -152,6 +153,8 @@ struct num {
 			}
 		} else if (id == 4) {
 			fz = c.fz, fm = c.fm;
+		} else if (id == 5) {
+			tf = c.tf;
 		}
 		return *this;
 	}
@@ -181,6 +184,8 @@ struct num {
 	
 	bool operator<(const num &b) const;
 };
+
+num tru, fals;
 
 num var[3005];
 int tot = 0;
@@ -268,6 +273,8 @@ bool num::operator==(const num &c) const {
 	} else if (a.id == 2 || a.id == 4 || b.id == 2 || b.id == 4) {
 		a = cfloat(a), b = cfloat(b);
 		return abs(a.floatnum - b.floatnum) < 0.0000001;
+	} else if (a.id == 5 && b.id == 5) {
+		return a.tf == b.tf;
 	} else {
 		a = cbignum(a), b = cbignum(b);
 		if (a.zf != b.zf) return 0;
@@ -529,6 +536,12 @@ ostream& operator<<(ostream &os, const num &obj) {
 		if (p == 0) os << 0;
 	} else if (obj.id == 4) {
 		os << obj.fz << '/' << obj.fm;
+	} else if (obj.id == 5) {
+		if (obj.tf == 0) {
+			os << "#f";
+		} else {
+			os << "#t";
+		}
 	}
 }
 
@@ -686,13 +699,23 @@ int findpname(string s, int pl, int pr) {
 	return 0;
 }
 bool isop(char c) {
-	 return c == '+' || c == '-' || c == '*' || c == '/';
+	 return c == '+' || c == '-' || c == '*' || c == '/' || c == '=';
 }
 num calcv(num a, num b, char c) {
 	if (c == '+') return a + b;
 	else if (c == '-') return a - b;
 	else if (c == '*') return a * b;
 	else if (c == '/') return a / b;
+	else if (c == '=') {
+		num d;
+		d.id = 5;
+		if (a == b) {
+			d.tf = 1;
+		} else {
+			d.tf = 0;
+		}
+		return d;
+	}
 	return a;
 }
 
@@ -727,14 +750,23 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 	if (numon(s)) {
 		return numv(s);
 	} else if (yr > yl && findpname(s, yl, yr)) {
+		cout << "why?!" << endl;
+		cout << pvar[findpname(s, yl, yr)] << endl;
 		return pvar[findpname(s, yl, yr)];
 	} else if (findname(s)) {
 		return var[findname(s)];
 	} else if (isop(s[1])) {
 		int k1 = 2, k2 = getnex(s, k1), k3 = getnex(s, k2);
 		string s1 (s, k1 + 1, k2 - k1 - 1), s2 (s, k2 + 1, k3 - k2 - 1);
-		num v1 = getvalue(s1, yl, yr), v2 = getvalue(s2, yl, yr);
-		v1 = calcv(v1, v2, s[1]);
+		num v1 = getvalue(s1, yl, yr), v2 = getvalue(s2, yl, yr), v3;
+		v3 = v1;
+		v1 = calcv(v3, v2, s[1]);
+		if (s[1] == '=') {
+			cout << "v1 v2 " << v3 << ' ' << v2 << endl;
+			cout << "TF? " << v1 << endl;
+			cout << "TFF?! " << (v3 == v2) << endl;
+			return v1;
+		}
 		while (s[k3] == ' ') {
 			k2 = k3;
 			k3 = getnex(s, k2);
@@ -747,6 +779,26 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		int k1 = 1, k2 = getnex(s, k1), k3;
 		int fr = 0;
 		string s1 (s, k1, k2 - k1), s2;
+		if (s1 == "if") {
+			cout << "here" << endl;
+			k1 = k2, k2 = getnex(s, k1);
+			s1.assign(s, k1 + 1, k2 - k1 - 1);
+			cout << "s1 " << s1 << endl;
+			system("pause");
+			num d = getvalue(s1, yl, yr);
+			cout << "yl yr " << yl << ' ' << yr << endl;
+			cout << "pvar[vr] " << pvar[yr] << endl;
+			cout << "d " << d << endl;
+			k1 = k2, k2 = getnex(s, k1);
+			if (d == fals) {
+				k1 = k2, k2 = getnex(s, k1);
+				cout << "go" << endl;
+				system("pause");
+			}
+			s1.assign(s, k1 + 1, k2 - k1 - 1);
+			cout << "s1-2 " << s1 << endl;
+			return getvalue(s1, yl, yr);
+		}
 		//cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
 		
@@ -760,6 +812,7 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		while (y[x2] == ' ') {
 			x1 = x2, x2 = getnex(y, x1);
 			y1.assign(y, x1 + 1, x2 - x1 - 1);
+			cout << "y1 " << y1 << endl;
 			ptot++, pr = ptot;
 			pvar[pr].name = y1;
 		//	cout << "var " << y1 << endl;
@@ -772,6 +825,8 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 				s1.assign(s, k1 + 1, k2 - k1 - 1);
 		//		cout << "shi " << s1 << endl;
 				pvar[i] = getvalue(s1, yl, yr);
+				cout << "pvar " << pvar[i] << endl;
+				cout << "name " << pvar[i].name << endl;
 			}
 		}
 
@@ -791,8 +846,8 @@ int main() {
 	string s, s1;
 	s.clear();
 	char forgets[1005];
-	num a, b;
-	a = b;
+	num a = 1, b = 1.0;
+	cout << calcv(a, b, '=') << endl;
 	//printf("%d\n", __gcd(12, 27));
 	/*
 	num fairy;
@@ -807,6 +862,12 @@ int main() {
 	cout << fairy << fairy.id << endl;
 	*/
 	//return 0;
+	
+	//pre
+	tru.id = fals.id = 5;
+	tru.tf = 1, fals.tf = 0;	
+	//preend
+	
 	while (1) {
 		gets(forgets);
 		s += forgets;
@@ -861,4 +922,6 @@ int main() {
 441
 (sqaure (square 4))
 256
+(define (jie n) (if (= n 1) n (* n (jie (- n 1)))))
+(jie 6)
 */
