@@ -11,7 +11,9 @@ try to apply plus in integer
 #include<vector>
 #include<string>
 using namespace std;
-
+const int QVN = 1005;
+const int PVN = 30005;
+const int QFN = 1005;
 /*
 struct floatnum {
 	double value;
@@ -187,9 +189,9 @@ struct num {
 
 num tru, fals;
 
-num var[3005];
+num var[QVN];
 int tot = 0;
-num pvar[3005];
+num pvar[PVN];
 int ptot = 0;
 
 num cfloat(const num &b) {
@@ -585,7 +587,7 @@ bool numon(string s) {
 	int st = 0, dot = 0;
 	if (s[0] == '-') st = 1;
 	for (int i = st; i < len; i++) {
-		if (s[i] == '.') {
+		if (s[i] == '.' || s[i] == '/') {
 			if (dot == 0) dot = 1;
 			else return 0;
 		} else {
@@ -606,8 +608,12 @@ num numv(string s) {
 			dot = 1;
 			break;
 		}
+		if (s[i] == '/') {
+			dot = 2;
+			break;
+		}
 	}
-	if (dot) {
+	if (dot == 1) {
 		v.id = 2, v.floatnum = 0;
 		double q = 1;
 		int dot1 = 0;
@@ -618,6 +624,18 @@ num numv(string s) {
 		}
 		v.floatnum /= q;
 		if (st == 1) v.floatnum = -v.floatnum;
+	} else if (dot == 2) {
+		v.id = 4, v.fz = 0, v.fm = 0;
+		int dot1 = 0;
+		for (int i = st; i < len; i++) {
+			if (s[i] == '/') {
+				dot1 = 1;
+				continue;
+			}
+			if (dot1) v.fm = v.fm * 10 + (s[i] - '0');
+			else v.fz = v.fz * 10 + (s[i] - '0');
+		}
+		if (st == 1) v.fz = -v.fz;
 	} else if (len < 9) {
 		v.id = 1, v.intnum = 0;
 		for (int i = st; i < len; i++) {
@@ -699,14 +717,20 @@ int findpname(string s, int pl, int pr) {
 	return 0;
 }
 bool isop(char c) {
-	 return c == '+' || c == '-' || c == '*' || c == '/' || c == '=';
+	 return c == '+' || c == '-' || c == '*' || c == '/'
+	 || c == '=' || c == '>' || c == '<'; // || c == '&' || c == '|' || c == '!';
+}
+bool isaon(string s) {
+	return  (s[1] == 'a' && s[2] == 'n' && s[3] == 'd' && s[4] == ' ') ||
+			(s[1] == 'o' && s[2] == 'r' && s[3] == ' ') ||
+			(s[1] == 'n' && s[2] == 'o' && s[3] == 't' && s[4] == ' ');
 }
 num calcv(num a, num b, char c) {
 	if (c == '+') return a + b;
 	else if (c == '-') return a - b;
 	else if (c == '*') return a * b;
 	else if (c == '/') return a / b;
-	else if (c == '=') {
+	if (c == '=') {
 		num d;
 		d.id = 5;
 		if (a == b) {
@@ -715,13 +739,37 @@ num calcv(num a, num b, char c) {
 			d.tf = 0;
 		}
 		return d;
+	} else if (c == '<') {
+		num d;
+		d.id = 5;
+		if (a < b) {
+			d.tf = 1;
+		} else {
+			d.tf = 0;
+		}
+		return d;
+	} else if (c == '>')  {
+		num d;
+		d.id = 5;
+		if (a < b) {
+			d.tf = 0;
+		} else if (a == b) {
+			d.tf = 0;
+		} else {
+			d.tf = 1;
+		}
+		return d;
+	} else if (c == 'a') {
+		return a.tf == 1 && b.tf == 1;
+	} else if (c == 'o') {
+		return a.tf == 1 || b.tf == 1;
 	}
 	return a;
 }
 
-string fname[1005];
-string fmat[1005];
-string func[1005];
+string fname[QFN];
+string fmat[QFN];
+string func[QFN];
 int ftot = 0;
 /*
 (define (square x) (* x x))
@@ -755,13 +803,22 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		return pvar[findpname(s, yl, yr)];
 	} else if (findname(s)) {
 		return var[findname(s)];
-	} else if (isop(s[1])) {
-		int k1 = 2, k2 = getnex(s, k1), k3 = getnex(s, k2);
-		string s1 (s, k1 + 1, k2 - k1 - 1), s2 (s, k2 + 1, k3 - k2 - 1);
+	} else if (isop(s[1]) || isaon(s)) {
+		int k1, k2, k3;
+		k1 = getnex(s, 0), k2 = getnex(s, k1), k3 = getnex(s, k2);
+		string s1 (s, k1 + 1, k2 - k1 - 1), s2;
+		if (s[1] == 'n') {
+			num ans = getvalue(s1);
+			ans.tf = !ans.tf;
+			return ans;
+		}
+		s2.assign(s, k2 + 1, k3 - k2 - 1);
+		//cout << "s1 " << s1 << endl << "s2 " << s2 << endl << endl;
 		num v1 = getvalue(s1, yl, yr), v2 = getvalue(s2, yl, yr), v3;
+		
 		v3 = v1;
 		v1 = calcv(v3, v2, s[1]);
-		if (s[1] == '=') {
+		if (s[1] == '=' || s[1] == '<' || s[1] == '>') {
 		//	cout << "v1 v2 " << v3 << ' ' << v2 << endl;
 		//	cout << "TF? " << v1 << endl;
 		//	cout << "TFF?! " << (v3 == v2) << endl;
@@ -784,7 +841,7 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 			k1 = k2, k2 = getnex(s, k1);
 			s1.assign(s, k1 + 1, k2 - k1 - 1);
 		//	cout << "s1 " << s1 << endl;
-		//	system("pause");
+			//system("pause");
 			num d = getvalue(s1, yl, yr);
 		//	cout << "yl yr " << yl << ' ' << yr << endl;
 		//	cout << "pvar[vr] " << pvar[yr] << endl;
@@ -798,6 +855,28 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 			s1.assign(s, k1 + 1, k2 - k1 - 1);
 		//	cout << "s1-2 " << s1 << endl;
 			return getvalue(s1, yl, yr);
+		} else if (s1 == "cond") {
+			k3 = k2;
+			int use = 0;
+			while (1) {
+				k2 = k3, k1 = k3, k3 = getnex(s, k1);
+				k1 = k2 + 1, k2 = getnex(s, k1);
+				s1.assign(s, k1 + 1, k2 - k1 - 1);
+				//cout << "s1 " << s1 << endl;
+				if (s1 != "else") {
+					num d = getvalue(s1, yl, yr);
+					if (d == tru) {
+						use = 1;
+					}
+				} else use = 1;
+				if (use) {
+					k1 = k2, k2 = getnex(s, k1);
+					s2.assign(s, k1 + 1, k2 - k1 - 1);
+					//cout << "s2 " << s2 << endl;
+					num d = getvalue(s2, yl, yr);
+					return d;
+				}
+			}
 		}
 		//cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
@@ -933,6 +1012,7 @@ int main() {
 			cout << var[1] << ' ' << var[2] << endl;
 		}
 		*/
+		//cout << ptot << endl;
 	}
 	return 0;
 }
@@ -949,4 +1029,54 @@ int main() {
 (define (fib n) (if (= n 0) 0 (if (= n 1) 1 (+ (fib (- n 1)) (fib (- n 2))))))
 
 0 1 1 2 3 5 8 13 21 34 55
+
+(+ 1 2)
+(+ 1.0 2.0)
+(+ 1 2.0)
+(/ 3 4)
+(+ 123/345 456/567)
+(+ 1.0 123/456)
+(- 1.23645 0.23645)
+(* 200.2 200.2)
+(+ (/ 3 13) (/ 5.0 13))
+(+ 2 5 6)
+(/ (/ 3 4) (/ 5 6))
+(+ (/ 3 4) (/ 1 4))
+(= 0 1)
+(define a 3)
+(define b (+ a 1))
+(if (and (> b a) (< b (* a b)))
+     b
+     a)
+(cond ((= a 4) 6)
+      ((= b 4) (+ 6 7 a))
+      (else 25))
+(* (cond ((> a b) a)
+         ((< a b) b)
+         (else -1))
+   (+ a 1))
+
+(define (aplusb a b)
+  (+ a b))
+(define (square a)
+  (* a a))
+(define (sum-of-square a b)
+  (+ (* a a)
+     (* b b)))
+(define (abs2 a) (if (< a 0) (- 0 a) a))
+(define (sqrt-iter guess x)
+  (if (good-enough? guess x)
+      guess
+      (sqrt-iter (improve guess x)
+                 x)))
+(define (improve guess x)
+  (average guess (/ x guess)))
+(define (average x y)
+  (/ (+ x y) 2))
+(define (good-enough? guess x)
+  (< (/ (abs2 (- (square guess) x))
+        x)
+     0.0000001))
+(define (newton x)
+  (sqrt-iter 1.0 x))
 */
