@@ -10,9 +10,10 @@ try to apply plus in integer
 #include<iostream>
 #include<vector>
 #include<string>
+#pragma comment(linker, "/STACK:102400000,10240000")  
 using namespace std;
 const int QVN = 1005;
-const int PVN = 30005;
+const int PVN = 50005;
 const int QFN = 1005;
 struct num {
 	int id;//1 2 3 4 5 6 int float high fraction #t#f string 
@@ -629,9 +630,15 @@ num calcv(num a, num b, char c) {
 		}
 		return d;
 	} else if (c == 'a') {
-		return a.tf == 1 && b.tf == 1;
+		num d;
+		d.id = 5;
+		d.tf = (a.tf == 1 && b.tf == 1);
+		return d;
 	} else if (c == 'o') {
-		return a.tf == 1 || b.tf == 1;
+		num d;
+		d.id = 5;
+		d.tf = (a.tf == 1 || b.tf == 1);
+		return d;
 	}
 	return a;
 }
@@ -715,8 +722,10 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 	}
 	return a;
 }
+int countg = 0;
 num getvalue(string s, int yl, int yr) {
-	//cout << endl << "s " << s << endl;
+	countg++;
+	//cout << countg << endl;
 	if (numon(s)) {
 		return numv(s);
 	} else if (yr > yl && findpname(s, yl, yr)) {
@@ -747,6 +756,8 @@ num getvalue(string s, int yl, int yr) {
 			v2 = getvalue(s2, yl, yr);
 			v1 = calcv(v1, v2, s[1]);
 		}
+		//cout << "s  " << s << endl;
+		//cout << "v1 " << v1 << endl;
 		return v1;
 	} else {
 		int k1 = 1, k2 = getnex(s, k1), k3;
@@ -778,8 +789,12 @@ num getvalue(string s, int yl, int yr) {
 					num d = getvalue(s1, yl, yr);
 					if (d == tru) {
 						use = 1;
+						//cout << "damn\n";
 					}
-				} else use = 1;
+				} else {
+					//cout << "reach else\n";
+					use = 1;
+				}
 				if (use) {
 					k1 = k2, k2 = getnex(s, k1);
 					s2.assign(s, k1 + 1, k2 - k1 - 1);
@@ -855,7 +870,7 @@ int main() {
 
 	//pre
 	tru.id = fals.id = 5;
-	tru.tf = 1, fals.tf = 0;	
+	tru.tf = 1, fals.tf = 0;
 	//preend
 	int predefine = 3;
 	int cpre = 0;
@@ -943,6 +958,7 @@ int main() {
 					}
 					//cout << fname[ftot] << endl << fmat[ftot] << endl << func[ftot] << endl;
 					s.clear();
+					//cout << "once" << endl;
 					continue;
 				}
 				tot++;
@@ -954,14 +970,34 @@ int main() {
 				//cout << getvalue(s2) << endl;
 				s.clear();
 			} else {
-				a = getvalue(s);
+				cout << getvalue(s) << endl;
 				s.clear();
 			}
 		} else if (!s.empty()) {
 			a = getvalue(s);
 			s.clear();
 		}
+		//cout << tot << endl << ptot << endl << ftot << endl;
+		//cout << "once" << endl;
 	}
 	return 0;
 }
-
+/*
+(define (count-change amount)
+  (cc amount 5))
+(define (cc amount kinds-of-coins)
+  (cond ((= amount 0) 1)
+        ((or (< amount 0) (= kinds-of-coins 0)) 0)
+        (else (+ (cc amount
+                     (- kinds-of-coins 1))
+                 (cc (- amount
+                      (first-denomination kinds-of-coins))
+                     kinds-of-coins)))))
+(define (first-denomination kinds-of-coins)
+  (cond ((= kinds-of-coins 1) 1)
+        ((= kinds-of-coins 2) 5)
+        ((= kinds-of-coins 3) 10)
+        ((= kinds-of-coins 4) 25)
+        ((= kinds-of-coins 5) 50)))
+(count-change 79)
+*/
