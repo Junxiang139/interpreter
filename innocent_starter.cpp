@@ -119,6 +119,22 @@ string fmat[QFN];
 string func[QFN];
 int ftot = 0;
 
+num cintnum(const num &b) {
+	num a;
+	a.id = 1;
+	if (b.id == 1) {
+		return b;
+	} else if (b.id == 3) {
+		a.intnum = 0;
+		for (int i = 1; i <= b.a[0]; i++) {
+			a.intnum = a.intnum * 10 + b.a[i];
+		}
+		if (b.zf == 1) {
+			a.intnum = -a.intnum;
+		}
+	}
+	return a;
+}
 num cfloat(const num &b) {
 	num a;
 	a.id = 2;
@@ -465,6 +481,8 @@ ostream& operator<<(ostream &os, const num &obj) {
 	}
 }
 
+num getvalue(string s, int yl = 0, int yr = 0);
+
 int lbra = 0, rbra = 0;
 void calclr(string s) {
 	int len = s.length();
@@ -614,7 +632,7 @@ num calcv(num a, num b, char c) {
 	return a;
 }
 
-int findname(string s) {
+int findname(string s) {//for var 
 	for (int i = 1; i <= tot; i++) {
 		if (var[i].name == s) {
 			return i;
@@ -622,7 +640,7 @@ int findname(string s) {
 	}
 	return 0;
 }
-int findpname(string s, int pl, int pr) {
+int findpname(string s, int pl, int pr) {//for part var
 	for (int i = pl + 1; i <= pr; i++) {
 		if (pvar[i].name == s) {
 			return i;
@@ -638,7 +656,61 @@ int findfunc(string s) {
 	}
 	return 0;
 }
-num getvalue(string s, int yl = 0, int yr = 0) {
+
+string pref[1005];
+int pretot = 10;
+int ispref(string s) {
+	for (int i = 1; i <= pretot; i++) {
+		if (s == pref[i]) {
+			return i;
+		}
+	}
+	return 0;
+}
+num calcpref(string s, string s1) {
+	num a;
+	if (s1 == "display") {
+		string s2;
+		num b, c;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2);
+		cout << b;
+	} else if (s1 == "newline") {
+		cout << endl;
+	} else if (s1 == "quotient") {
+		string s2;
+		num b, c;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2);
+		b = cintnum(b);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		c = getvalue(s2);
+		c = cintnum(c);
+		a = b;
+		a.intnum = b.intnum / c.intnum;
+	} else if (s1 == "modulo") {
+		string s2;
+		num b, c;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2);
+		b = cintnum(b);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		c = getvalue(s2);
+		c = cintnum(c);
+		a = b;
+		a.intnum = b.intnum % c.intnum;
+	}
+	return a;
+}
+num getvalue(string s, int yl, int yr) {
 	if (numon(s)) {
 		return numv(s);
 	} else if (yr > yl && findpname(s, yl, yr)) {
@@ -710,6 +782,8 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 					return d;
 				}
 			}
+		} else if (ispref(s1)) {
+			return calcpref(s, s1);
 		}
 		//cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
@@ -746,6 +820,10 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 }
 
 int main() {
+	pref[1] = "display";
+	pref[2] = "newline";
+	pref[3] = "quotient";
+	pref[4] = "modulo";
 	string s, s1;
 	s.clear();
 	char forgets[1005];
