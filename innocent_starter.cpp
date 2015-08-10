@@ -15,7 +15,7 @@ const int QVN = 1005;
 const int PVN = 30005;
 const int QFN = 1005;
 struct num {
-	int id;//1 2 3 4 5 int float high fraction #t#f
+	int id;//1 2 3 4 5 6 int float high fraction #t#f string 
 	int intnum;
 	double floatnum;
 	bool zf;
@@ -23,6 +23,7 @@ struct num {
 	int fz, fm;
 	bool tf;
 	string name;
+	string str;
 	num () {
 		id = 1;
 		intnum = 0;
@@ -40,38 +41,10 @@ struct num {
 		floatnum = b;
 	}
 	num (string b) {
-		int l = b.length();
-		//printf("l = %d\n", l);
-		zf = 0;
-		if (b[0] == '-') zf = 1;
-		if (l < 9) {
-			id = 1;
-			intnum = 0;
-			if (zf == 0) {
-				for (int i = l - 1; i >= 0; i--) {
-					intnum = intnum * 10 + b[i] - '0';
-				}
-			} else {
-				for (int i = l - 1; i >= 1; i--) {
-					intnum = intnum * 10 + b[i] - '0';
-				}
-			}
-		} else {
-			//printf("here\n");
-			id = 3;
-			a[0] = l;
-			///*
-			if (zf == 0) {
-				for (int i = l - 1, j = 1; j <= l; j++, i--) {
-					a[j] = b[i] - '0';
-				}
-			} else {
-				for (int i = l - 1, j = 1; j < l; j++, i--) {
-					a[j] = b[i] - '0';
-				}
-			}
-			//*/
-		}
+		id = 6;
+		str = b;
+		str.erase(str.end() - 1);
+		str.erase(str.begin());
 	}
 	
 	num &operator=(const num &c) { //不复制变量名 
@@ -91,6 +64,8 @@ struct num {
 			fz = c.fz, fm = c.fm;
 		} else if (id == 5) {
 			tf = c.tf;
+		} else if (id == 6) {
+			str = c.str;
 		}
 		return *this;
 	}
@@ -216,7 +191,7 @@ bool num::operator==(const num &c) const {
 		return abs(a.floatnum - b.floatnum) < 0.0000001;
 	} else if (a.id == 5 && b.id == 5) {
 		return a.tf == b.tf;
-	} else {
+	} else if (a.id != 6) {
 		a = cbignum(a), b = cbignum(b);
 		if (a.zf != b.zf) return 0;
 		if (a.a[0] != b.a[0]) return 0;
@@ -224,6 +199,8 @@ bool num::operator==(const num &c) const {
 			if (a.a[i] != b.a[i]) return 0;
 		}
 		return 1;
+	} else {
+		return a.str == b.str;
 	}
 }
 bool num::operator<(const num &c) const {
@@ -236,7 +213,7 @@ bool num::operator<(const num &c) const {
 	} else if (a.id == 2 || a.id == 4 || b.id == 2 || b.id == 4) {
 		a = cfloat(a), b = cfloat(b);
 		return a.floatnum < b.floatnum;
-	} else {
+	} else if (a.id != 6) {
 		a = cbignum(a), b = cbignum(b);
 		if (a == b) return 0;
 		if (a.zf != b.zf) return a.zf > c.zf;
@@ -252,6 +229,8 @@ bool num::operator<(const num &c) const {
 			a.zf = 0, b.zf = 0;
 			return !(a < b);
 		}
+	} else {
+		return a.str < b.str;
 	}
 }
 num num::operator+(const num &c) const {
@@ -290,7 +269,7 @@ num num::operator+(const num &c) const {
 	} else if (id == 2 || id == 4 || c.id == 2 || c.id == 4) {
 		a = cfloat(*this), b = cfloat(c);
 		a.floatnum += b.floatnum;
-	} else {
+	} else if (id != 6) {
 		a = cbignum(*this), b = cbignum(c);
 		if (a.zf == b.zf) {
 			a.a[0] = max(a.a[0], b.a[0]);
@@ -351,6 +330,8 @@ num num::operator+(const num &c) const {
 				}
 			}
 		}
+	} else {
+		a.str += b.str;
 	}
 	return a;
 }
@@ -434,6 +415,7 @@ num num::operator*(const num &c) const {
 		}
 		d.a[0] = l;
 		a = d;
+		a.zf = (zf != c.zf);
 	}
 	return a;
 }
@@ -478,6 +460,8 @@ ostream& operator<<(ostream &os, const num &obj) {
 		} else {
 			os << "#t";
 		}
+	} else if (obj.id == 6) {
+		os << obj.str;
 	}
 }
 
@@ -487,9 +471,12 @@ int lbra = 0, rbra = 0;
 void calclr(string s) {
 	int len = s.length();
 	lbra = rbra = 0;
+	int dd = 1, nd = 1;
 	for (int i = 0; i < len; i++) {
-		if (s[i] == '(') lbra++;
-		else if (s[i] == ')') rbra++;
+		if (s[i] == '"') dd = !dd;
+		if (s[i] == ';') nd = 0;
+		if (dd && nd && s[i] == '(') lbra++;
+		else if (dd && nd && s[i] == ')') rbra++;
 	}
 	return;
 }
@@ -497,6 +484,14 @@ void calclr(string s) {
 int getnex(string s, int pos) {
 	int l = 1, r = 0, len = s.length();
 	pos++;
+	if (s[pos] == '"') {
+		pos++;
+		while (s[pos] != '"') {
+			pos++;
+		}
+		pos++;
+		return pos;
+	}
 	if (s[pos] != '(') {
 		while (s[pos] != ' ' && s[pos] != ')' && pos < len) pos++;
 		return pos;
@@ -522,6 +517,7 @@ bool isaon(string s) {
 }
 bool numon(string s) {
 	int len = s.length();
+	if (s[0] == '"') return 1;
 	int st = 0, dot = 0;
 	if (s[0] == '-') st = 1;
 	for (int i = st; i < len; i++) {
@@ -537,6 +533,14 @@ bool numon(string s) {
 num numv(string s) {
 	int len = s.length();
 	num v;
+	if (s[0] == '"') {
+		v.id = 6;
+		v.str = s;
+		//cout << v << endl;
+		v.str.erase(v.str.end() - 1);
+		v.str.erase(v.str.begin());
+		return v;
+	}
 	int dot = 0;
 	int st = 0;
 	if (s[0] == '-') st = 1;
@@ -667,7 +671,7 @@ int ispref(string s) {
 	}
 	return 0;
 }
-num calcpref(string s, string s1) {
+num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 	num a;
 	if (s1 == "display") {
 		string s2;
@@ -675,7 +679,8 @@ num calcpref(string s, string s1) {
 		int k1 = 0, k2 = getnex(s, k1);
 		k1 = k2, k2 = getnex(s, k1);
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
-		b = getvalue(s2);
+	//	cout << "cp s2 " << s2 << endl << "yl yr " << yl << yr << endl;
+		b = getvalue(s2, yl, yr);
 		cout << b;
 	} else if (s1 == "newline") {
 		cout << endl;
@@ -685,11 +690,11 @@ num calcpref(string s, string s1) {
 		int k1 = 0, k2 = getnex(s, k1);
 		k1 = k2, k2 = getnex(s, k1);
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
-		b = getvalue(s2);
+		b = getvalue(s2, yl, yr);
 		b = cintnum(b);
 		k1 = k2, k2 = getnex(s, k1);
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
-		c = getvalue(s2);
+		c = getvalue(s2, yl, yr);
 		c = cintnum(c);
 		a = b;
 		a.intnum = b.intnum / c.intnum;
@@ -699,11 +704,11 @@ num calcpref(string s, string s1) {
 		int k1 = 0, k2 = getnex(s, k1);
 		k1 = k2, k2 = getnex(s, k1);
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
-		b = getvalue(s2);
+		b = getvalue(s2, yl, yr);
 		b = cintnum(b);
 		k1 = k2, k2 = getnex(s, k1);
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
-		c = getvalue(s2);
+		c = getvalue(s2, yl, yr);
 		c = cintnum(c);
 		a = b;
 		a.intnum = b.intnum % c.intnum;
@@ -711,6 +716,7 @@ num calcpref(string s, string s1) {
 	return a;
 }
 num getvalue(string s, int yl, int yr) {
+	//cout << endl << "s " << s << endl;
 	if (numon(s)) {
 		return numv(s);
 	} else if (yr > yl && findpname(s, yl, yr)) {
@@ -783,12 +789,19 @@ num getvalue(string s, int yl, int yr) {
 				}
 			}
 		} else if (ispref(s1)) {
-			return calcpref(s, s1);
+			return calcpref(s, s1, yl, yr);
 		}
 		//cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
+		/*
+		cout << "here" << endl;
+		k3 = getnex(s, k2);
+		s2.assign(s, k2 + 1, k3 - k2 - 1);
+		cout << "s1 " << s1 << endl << "s2 " << s2 << endl;
+		*/
+		
 		//define var
-		int pl = ptot, pr;//range of ptot
+		int pl = ptot, pr = ptot;//range of ptot
 		string y = fmat[fr];//(square x)
 		string y1;
 		//cout << "y " << y << endl;
@@ -797,7 +810,6 @@ num getvalue(string s, int yl, int yr) {
 		while (y[x2] == ' ') {
 			x1 = x2, x2 = getnex(y, x1);
 			y1.assign(y, x1 + 1, x2 - x1 - 1);
-		//	cout << "y1 " << y1 << endl;
 			ptot++, pr = ptot;
 			pvar[pr].name = y1;
 		//	cout << "var " << y1 << endl;
@@ -808,12 +820,24 @@ num getvalue(string s, int yl, int yr) {
 				k1 = k2, k2 = getnex(s, k1);
 				s1.assign(s, k1 + 1, k2 - k1 - 1);
 				pvar[i] = getvalue(s1, yl, yr);
+		//		cout << "pvar " << pvar[i] << endl;
 			}
 		}
 		string z = func[fr];//(* x x)
 		//cout << "func " << z << endl;
-		if (pr > pl) return getvalue(z, pl, pr);
-		else return getvalue(z);
+		k1 = -1, k2 = getnex(z, k1);
+		num a;
+		while (1) {
+			s2.assign(z, k1 + 1, k2 - k1 - 1);
+			//cout << "s2 " << s2 << endl;
+			if (pr > pl) a = getvalue(s2, pl, pr);
+			else a = getvalue(s2);
+			if (z[k2] != ' ') break;
+			k1 = k2, k2 = getnex(z, k1);
+		//	cout << "1cget\n";
+	//		cout << "zk1" << z[k1] << "zk1+1" << z[k1+1] << endl;
+		}
+		return a;
 		//cout << sf << endl;
 	}
 	return 0;
@@ -833,8 +857,25 @@ int main() {
 	tru.id = fals.id = 5;
 	tru.tf = 1, fals.tf = 0;	
 	//preend
-	
+	int predefine = 3;
+	int cpre = 0;
 	while (1) {
+		if (cpre < predefine) {
+		
+		cpre++;
+		if (cpre == 1) {
+			s = "(define #t 0)";
+		} else if (cpre == 2) {
+			s = "(define #f 0)";
+		} else {
+			var[1].id = 5;
+			var[1].tf = 1;
+			var[2].id = 5;
+			var[2].tf = 0;
+		}
+		
+		} else {
+		
 		gets(forgets);
 		s += forgets;
 		if (s == "Requiescat in pace") break;
@@ -842,6 +883,17 @@ int main() {
 		if (lbra != rbra) continue;
 		bool dd = 1;
 		string::iterator ti, it;
+		it = s.begin();
+		while (it != s.end() && !(dd == 1 && (*it) == ';')) {
+			if ((*it) == '"') dd = !dd;
+			it++;
+		}
+		if ((*it) == ';') {
+			while (it != s.end()) {
+				s.erase(it);
+			}
+			//cout << s << endl;
+		}
 		it = s.begin();
 		while (*it == ' ' && !s.empty()) {
 			s.erase(it);
@@ -851,6 +903,7 @@ int main() {
 			s.erase(ti);
 			ti--;
 		}
+		dd = 1;
 		if (!s.empty()) {
 			for (ti = s.begin(), it = ti + 1; it != s.end(); ti = it, it++) {
 				if (*it == '"') dd = !dd;
@@ -867,11 +920,13 @@ int main() {
 				}
 			}
 		}
+		
+		}
 		//cout << s << endl;
 		//define
 		ptot = 0;
 		if (s.length() >= 8) {
-			string s2 (s, 1, 6);
+			string s2 (s, 1, 6), s3;
 			if (s2 == "define") {
 				int k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
 				if (s[k1 + 1] == '(') {
@@ -881,7 +936,12 @@ int main() {
 					k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
 					fmat[ftot].assign(s, k1 + 1, k2 - k1 - 1);
 					func[ftot].assign(s, k2 + 1, k3 - k2 - 1);
-				//	cout << fname[ftot] << endl << fmat[ftot] << endl << func[ftot] << endl;
+					while (s[k3] == ' ') {
+						k2 = k3, k3 = getnex(s, k3);
+						s3.assign(s, k2 + 1, k3 - k2 - 1), s3 = ' ' + s3;
+						func[ftot] += s3;
+					}
+					//cout << fname[ftot] << endl << fmat[ftot] << endl << func[ftot] << endl;
 					s.clear();
 					continue;
 				}
@@ -894,11 +954,11 @@ int main() {
 				//cout << getvalue(s2) << endl;
 				s.clear();
 			} else {
-				cout << getvalue(s) << endl;
+				a = getvalue(s);
 				s.clear();
 			}
-		} else {
-			cout << getvalue(s) << endl;
+		} else if (!s.empty()) {
+			a = getvalue(s);
 			s.clear();
 		}
 	}
