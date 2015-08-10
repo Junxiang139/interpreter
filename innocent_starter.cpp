@@ -14,58 +14,6 @@ using namespace std;
 const int QVN = 1005;
 const int PVN = 30005;
 const int QFN = 1005;
-/*
-struct floatnum {
-	double value;
-	floatnum () {
-		//id = 2;
-		value = 0;
-	}
-};
-
-struct bignum {
-	//int id;
-	int a[258];
-	bigbum () {
-		//id = 3;
-		a[0] = 0;
-	}
-	operator floatnum () const {
-		floatnum b;
-		for (int i = 1; i <= a[0]; i++) {
-			b.value = b.value * 10 + a[0];
-		}
-		return b;
-	}
-};
-
-struct intnum {
-	int value;
-	intnum () {
-		//id = 1;
-		value = 0;
-	}
-	
-	operator bignum () const {
-		bignum b;
-		int len = 0;
-		int v = value;
-		while (v) {
-			len++;
-			b.a[len] = v % 10;
-			v /= 10;
-		}
-		b.a[0] = len;
-	}
-	
-	operator floatnum () const {
-		floatnum b;
-		b.value = value;
-		return b;
-	}
-};
-*/
-
 struct num {
 	int id;//1 2 3 4 5 int float high fraction #t#f
 	int intnum;
@@ -117,24 +65,10 @@ struct num {
 				for (int i = l - 1, j = 1; j <= l; j++, i--) {
 					a[j] = b[i] - '0';
 				}
-				/*
-				printf("id = %d\n", id);
-				for (int i = 0; i <= a[0]; i++) {
-					printf("%d", a[i]);
-				}
-				printf("\n");
-				*/
 			} else {
 				for (int i = l - 1, j = 1; j < l; j++, i--) {
 					a[j] = b[i] - '0';
 				}
-				/*
-				printf("id = %d\n", id);
-				for (int i = 0; i <= a[0]; i++) {
-					printf("%d", a[i]);
-				}
-				printf("\n");
-				*/
 			}
 			//*/
 		}
@@ -162,19 +96,6 @@ struct num {
 	}
 	
 	num operator+(const num &c) const;
-	/* {
-		if (id == 1 && c.id == 1) {
-			num a;
-			a.id = 1;
-			a.intnum = intnum + c.intnum;
-			return a;
-		} else if (id == 2 || c.id == 2) {
-			num a, b;
-			a = cfloat(*this), b = cfloat(c);
-		} else {
-			
-		}
-	}*/
 	
 	num operator-(const num &b) const;
 	
@@ -547,30 +468,6 @@ ostream& operator<<(ostream &os, const num &obj) {
 	}
 }
 
-/*
-template <typename T>
-void type (T a) {
-	cout << a.id << endl;
-}
-*/
-
-/*
-template <typename T>
-floatnum cfloatnum(T a) {
-	if (typeid(a) == typeid(floatnum)) return a;
-	if (typeid(a) == typeid(intnum)) {
-		floatnum b;
-		b.value = a.value;
-		return b;
-	}
-}
-*/
-/*
-vector<intnum> intlist;    //rank % 3 = 0
-vector<floatnum> floatlist;//rank % 3 = 1
-vector<bignum> biglist;    //rank % 3 = 2
-*/
-
 int lbra = 0, rbra = 0;
 void calclr(string s) {
 	int len = s.length();
@@ -654,35 +551,6 @@ num numv(string s) {
 	return v;
 }
 
-/*
-template <class T>
-T eplus(T a, T b) {
-	if (typeid(a) == typeid(floatnum) || typeid(b) == typeid(floatnum)) {
-		floatnum c;
-		c.value = a.value + b.value;
-		return c;
-	} else {
-		intnum c;
-		c.value = a.value + b.value;
-		return c;
-	}
-}
-*/
-/*
-num eplus(num a, num b) {
-	//printf("id %d %d\n", a.id, b.id);
-	return a + b;
-}
-num eminus(num a, num b) {
-	return a - b;
-}
-num emulti(num a, num b) {
-	return a * b;
-}
-num divine(num a, num b) {
-	return a / b;
-}
-*/
 int getnex(string s, int pos) {
 	int l = 1, r = 0, len = s.length();
 	pos++;
@@ -766,23 +634,10 @@ num calcv(num a, num b, char c) {
 	}
 	return a;
 }
-
 string fname[QFN];
 string fmat[QFN];
 string func[QFN];
 int ftot = 0;
-/*
-(define (square x) (* x x))
-square
-(square x)
-(* x x)
-
-(define (sqrt) 5)
-sqrt
-(sqrt)
-5
-*/
-
 int findfunc(string s) {
 	for (int i = 1; i <= ftot; i++) {
 		if (fname[i] == s) {
@@ -791,15 +646,12 @@ int findfunc(string s) {
 	}
 	return 0;
 }
-
 //num pvar[3005];
 //int ptot = 0;
 num getvalue(string s, int yl = 0, int yr = 0) {
 	if (numon(s)) {
 		return numv(s);
 	} else if (yr > yl && findpname(s, yl, yr)) {
-		//cout << "why?!" << endl;
-		//cout << pvar[findpname(s, yl, yr)] << endl;
 		return pvar[findpname(s, yl, yr)];
 	} else if (findname(s)) {
 		return var[findname(s)];
@@ -815,13 +667,9 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		s2.assign(s, k2 + 1, k3 - k2 - 1);
 		//cout << "s1 " << s1 << endl << "s2 " << s2 << endl << endl;
 		num v1 = getvalue(s1, yl, yr), v2 = getvalue(s2, yl, yr), v3;
-		
 		v3 = v1;
 		v1 = calcv(v3, v2, s[1]);
 		if (s[1] == '=' || s[1] == '<' || s[1] == '>') {
-		//	cout << "v1 v2 " << v3 << ' ' << v2 << endl;
-		//	cout << "TF? " << v1 << endl;
-		//	cout << "TFF?! " << (v3 == v2) << endl;
 			return v1;
 		}
 		while (s[k3] == ' ') {
@@ -840,12 +688,7 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		//	cout << "here" << endl;
 			k1 = k2, k2 = getnex(s, k1);
 			s1.assign(s, k1 + 1, k2 - k1 - 1);
-		//	cout << "s1 " << s1 << endl;
-			//system("pause");
 			num d = getvalue(s1, yl, yr);
-		//	cout << "yl yr " << yl << ' ' << yr << endl;
-		//	cout << "pvar[vr] " << pvar[yr] << endl;
-		//	cout << "d " << d << endl;
 			k1 = k2, k2 = getnex(s, k1);
 			if (d == fals) {
 				k1 = k2, k2 = getnex(s, k1);
@@ -880,7 +723,6 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 		}
 		//cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
-		
 		//define var
 		int pl = ptot, pr;//range of ptot
 		string y = fmat[fr];//(square x)
@@ -896,22 +738,14 @@ num getvalue(string s, int yl = 0, int yr = 0) {
 			pvar[pr].name = y1;
 		//	cout << "var " << y1 << endl;
 		}
-		
 		//getvalue(every element);
 		if (pr > pl) {
 			for (int i = pl + 1; i <= pr; i++) {
 				k1 = k2, k2 = getnex(s, k1);
 				s1.assign(s, k1 + 1, k2 - k1 - 1);
-		//		cout << "shi " << s1 << endl;
 				pvar[i] = getvalue(s1, yl, yr);
-		//		cout << "pvar " << pvar[i] << endl;
-		//		cout << "name " << pvar[i].name << endl;
 			}
 		}
-
-//(jie x) (* x (jie (- x 1))
-//jie
-
 		string z = func[fr];//(* x x)
 		//cout << "func " << z << endl;
 		if (pr > pl) return getvalue(z, pl, pr);
@@ -926,22 +760,7 @@ int main() {
 	s.clear();
 	char forgets[1005];
 	num a = 1, b = 1.0;
-	//cout << calcv(a, b, '=') << endl;
-	//printf("%d\n", __gcd(12, 27));
-	/*
-	num fairy;
-	fairy = 3.1416;
-	cout << fairy << endl;
-	fairy = 120;
-	cout << fairy << fairy.id << endl;
-	fairy = 120.000;
-	cout << fairy << fairy.id << endl;
-	string b = "1293801124532134422";
-	fairy = b;
-	cout << fairy << fairy.id << endl;
-	*/
-	//return 0;
-	
+
 	//pre
 	tru.id = fals.id = 5;
 	tru.tf = 1, fals.tf = 0;	
@@ -1014,76 +833,7 @@ int main() {
 			cout << getvalue(s) << endl;
 			s.clear();
 		}
-		/*
-		if (tot == 2) {
-			cout << var[1] << ' ' << var[2] << endl;
-		}
-		*/
-		//cout << ptot << endl;
 	}
 	return 0;
 }
-/*
-(+ (+ 1 2) 3)
-(define (square x) (* x x))
-(square 21)
-441
-(sqaure (square 4))
-256
-(define (jie n) (if (= n 1) n (* n (jie (- n 1)))))
-(jie 6)
 
-(define (fib n) (if (= n 0) 0 (if (= n 1) 1 (+ (fib (- n 1)) (fib (- n 2))))))
-
-0 1 1 2 3 5 8 13 21 34 55
-
-(+ 1 2)
-(+ 1.0 2.0)
-(+ 1 2.0)
-(/ 3 4)
-(+ 123/345 456/567)
-(+ 1.0 123/456)
-(- 1.23645 0.23645)
-(* 200.2 200.2)
-(+ (/ 3 13) (/ 5.0 13))
-(+ 2 5 6)
-(/ (/ 3 4) (/ 5 6))
-(+ (/ 3 4) (/ 1 4))
-(= 0 1)
-(define a 3)
-(define b (+ a 1))
-(if (and (> b a) (< b (* a b)))
-     b
-     a)
-(cond ((= a 4) 6)
-      ((= b 4) (+ 6 7 a))
-      (else 25))
-(* (cond ((> a b) a)
-         ((< a b) b)
-         (else -1))
-   (+ a 1))
-
-(define (aplusb a b)
-  (+ a b))
-(define (square a)
-  (* a a))
-(define (sum-of-square a b)
-  (+ (* a a)
-     (* b b)))
-(define (abs2 a) (if (< a 0) (- 0 a) a))
-(define (sqrt-iter guess x)
-  (if (good-enough? guess x)
-      guess
-      (sqrt-iter (improve guess x)
-                 x)))
-(define (improve guess x)
-  (average guess (/ x guess)))
-(define (average x y)
-  (/ (+ x y) 2))
-(define (good-enough? guess x)
-  (< (/ (abs2 (- (square guess) x))
-        x)
-     0.0000001))
-(define (newton x)
-  (sqrt-iter 1.0 x))
-*/
