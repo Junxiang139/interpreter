@@ -951,6 +951,8 @@ int main() {
 		gets(forgets);
 		s += forgets;
 		if (s == "Requiescat in pace") break;
+		calclr(s);
+		if (lbra != rbra) continue;
 		bool dd = 1;
 		string::iterator ti, it;
 		it = s.begin();
@@ -966,14 +968,19 @@ int main() {
 			for (ti = s.begin(), it = ti + 1; it != s.end(); ti = it, it++) {
 				if (*it == '"') dd = !dd;
 				if (dd && (*ti) == ' ' && (*it) == ' ') {
-					s.erase(ti);
-					it--;
+					s.erase(it);
 					//cout << *ti << *it << "h\n";
+					it--;
+				} else if (dd && (*ti) == '(' && (*it) == ' ') {
+					s.erase(it);
+					it--;
+				} else if (dd && (*ti) == ' ' && (*it) == ')') {
+					s.erase(ti);
+					it--, it--;
 				}
 			}
 		}
-		calclr(s);
-		if (lbra != rbra) continue;
+		//cout << s << endl;
 		//define
 		ptot = 0;
 		if (s.length() >= 8) {
