@@ -109,11 +109,15 @@ struct num {
 };
 
 num tru, fals;
-
 num var[QVN];
 int tot = 0;
 num pvar[PVN];
 int ptot = 0;
+
+string fname[QFN];
+string fmat[QFN];
+string func[QFN];
+int ftot = 0;
 
 num cfloat(const num &b) {
 	num a;
@@ -135,7 +139,6 @@ num cfloat(const num &b) {
 	}
 	return a;
 }
-
 num cbignum(const num &b) {
 	num a;
 	a.id = 3;
@@ -158,7 +161,6 @@ num cbignum(const num &b) {
 	}
 	return a;
 }
-
 num reduct(const num &b) {
 	num a = b;
 	if (a.id == 4) {
@@ -173,7 +175,6 @@ num reduct(const num &b) {
 	}
 	return a;
 }
-
 num cfranum(const num &b) {
 	if (b.id == 4) {
 		return b;
@@ -186,6 +187,7 @@ num cfranum(const num &b) {
 	}
 	return a;
 }
+
 bool num::operator==(const num &c) const {
 	num a = *this, b = c;
 	if (a.id == 1 && b.id == 1) {
@@ -236,7 +238,6 @@ bool num::operator<(const num &c) const {
 		}
 	}
 }
-
 num num::operator+(const num &c) const {
 	num a, b;
 	if (id == 1 && c.id == 1) {
@@ -337,7 +338,6 @@ num num::operator+(const num &c) const {
 	}
 	return a;
 }
-//100000000000000000000
 num num::operator-(const num &c) const {
 	num a, b;
 	if (id == 1 && c.id == 1) {
@@ -360,7 +360,6 @@ num num::operator-(const num &c) const {
 	}
 	return a;
 }
-
 num num::operator*(const num &c) const {
 	num a, b;
 	if (id == 1 && c.id == 1) {
@@ -422,7 +421,6 @@ num num::operator*(const num &c) const {
 	}
 	return a;
 }
-//1238109823420938 1238109823420938
 num num::operator/(const num &c) const {
 	num a, b;
 	if (id == 1 && c.id == 1) {
@@ -444,7 +442,6 @@ num num::operator/(const num &c) const {
 	}
 	return a;
 }
-
 ostream& operator<<(ostream &os, const num &obj) {
 	if (obj.id == 1) {
 		os << obj.intnum;
@@ -479,6 +476,32 @@ void calclr(string s) {
 	return;
 }
 
+int getnex(string s, int pos) {
+	int l = 1, r = 0, len = s.length();
+	pos++;
+	if (s[pos] != '(') {
+		while (s[pos] != ' ' && s[pos] != ')' && pos < len) pos++;
+		return pos;
+	}
+	while (pos < len) {
+		pos++;
+		if (s[pos] == '(') l++;
+		else if (s[pos] == ')') {
+			r++;
+			if (l == r) return pos + 1;
+		}
+	}
+	return 0;
+}
+bool isop(char c) {
+	 return c == '+' || c == '-' || c == '*' || c == '/'
+	 || c == '=' || c == '>' || c == '<'; // || c == '&' || c == '|' || c == '!';
+}
+bool isaon(string s) {
+	return  (s[1] == 'a' && s[2] == 'n' && s[3] == 'd' && s[4] == ' ') ||
+			(s[1] == 'o' && s[2] == 'r' && s[3] == ' ') ||
+			(s[1] == 'n' && s[2] == 'o' && s[3] == 't' && s[4] == ' ');
+}
 bool numon(string s) {
 	int len = s.length();
 	int st = 0, dot = 0;
@@ -493,7 +516,6 @@ bool numon(string s) {
 	}
 	return 1;
 }
-
 num numv(string s) {
 	int len = s.length();
 	num v;
@@ -550,49 +572,6 @@ num numv(string s) {
 	}
 	return v;
 }
-
-int getnex(string s, int pos) {
-	int l = 1, r = 0, len = s.length();
-	pos++;
-	if (s[pos] != '(') {
-		while (s[pos] != ' ' && s[pos] != ')' && pos < len) pos++;
-		return pos;
-	}
-	while (pos < len) {
-		pos++;
-		if (s[pos] == '(') l++;
-		else if (s[pos] == ')') {
-			r++;
-			if (l == r) return pos + 1;
-		}
-	}
-	return 0;
-}
-int findname(string s) {
-	for (int i = 1; i <= tot; i++) {
-		if (var[i].name == s) {
-			return i;
-		}
-	}
-	return 0;
-}
-int findpname(string s, int pl, int pr) {
-	for (int i = pl + 1; i <= pr; i++) {
-		if (pvar[i].name == s) {
-			return i;
-		}
-	}
-	return 0;
-}
-bool isop(char c) {
-	 return c == '+' || c == '-' || c == '*' || c == '/'
-	 || c == '=' || c == '>' || c == '<'; // || c == '&' || c == '|' || c == '!';
-}
-bool isaon(string s) {
-	return  (s[1] == 'a' && s[2] == 'n' && s[3] == 'd' && s[4] == ' ') ||
-			(s[1] == 'o' && s[2] == 'r' && s[3] == ' ') ||
-			(s[1] == 'n' && s[2] == 'o' && s[3] == 't' && s[4] == ' ');
-}
 num calcv(num a, num b, char c) {
 	if (c == '+') return a + b;
 	else if (c == '-') return a - b;
@@ -634,10 +613,23 @@ num calcv(num a, num b, char c) {
 	}
 	return a;
 }
-string fname[QFN];
-string fmat[QFN];
-string func[QFN];
-int ftot = 0;
+
+int findname(string s) {
+	for (int i = 1; i <= tot; i++) {
+		if (var[i].name == s) {
+			return i;
+		}
+	}
+	return 0;
+}
+int findpname(string s, int pl, int pr) {
+	for (int i = pl + 1; i <= pr; i++) {
+		if (pvar[i].name == s) {
+			return i;
+		}
+	}
+	return 0;
+}
 int findfunc(string s) {
 	for (int i = 1; i <= ftot; i++) {
 		if (fname[i] == s) {
@@ -646,8 +638,6 @@ int findfunc(string s) {
 	}
 	return 0;
 }
-//num pvar[3005];
-//int ptot = 0;
 num getvalue(string s, int yl = 0, int yr = 0) {
 	if (numon(s)) {
 		return numv(s);
