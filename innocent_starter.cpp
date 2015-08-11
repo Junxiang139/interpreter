@@ -25,8 +25,9 @@ struct num {
 	bool tf;
 	string name;
 	string str;
+	string later;//save what should be get value, id = 0
 	num () {
-		id = 1;
+		id = 0;
 		intnum = 0;
 		floatnum = 0;
 		zf = 0;
@@ -646,6 +647,9 @@ num calcv(num a, num b, char c) {
 int findname(string s) {//for var 
 	for (int i = 1; i <= tot; i++) {
 		if (var[i].name == s) {
+			if (var[i].id == 0) {
+				var[i] = getvalue(var[i].later);
+			}
 			return i;
 		}
 	}
@@ -722,10 +726,7 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 	}
 	return a;
 }
-int countg = 0;
 num getvalue(string s, int yl, int yr) {
-	countg++;
-	//cout << countg << endl;
 	if (numon(s)) {
 		return numv(s);
 	} else if (yr > yl && findpname(s, yl, yr)) {
@@ -852,6 +853,9 @@ num getvalue(string s, int yl, int yr) {
 		//	cout << "1cget\n";
 	//		cout << "zk1" << z[k1] << "zk1+1" << z[k1+1] << endl;
 		}
+		if (pr == ptot) {
+			ptot = pl;
+		}
 		return a;
 		//cout << sf << endl;
 	}
@@ -966,7 +970,7 @@ int main() {
 				var[tot].name = s2;
 				s2.assign(s, k2 + 1, k3 - k2 - 1);
 				//cout << getvalue(s2) << endl;
-				var[tot] = getvalue(s2);
+				var[tot].later = s2;
 				//cout << getvalue(s2) << endl;
 				s.clear();
 			} else {
@@ -974,7 +978,7 @@ int main() {
 				s.clear();
 			}
 		} else if (!s.empty()) {
-			a = getvalue(s);
+			cout << getvalue(s) << endl;
 			s.clear();
 		}
 		//cout << tot << endl << ptot << endl << ftot << endl;
