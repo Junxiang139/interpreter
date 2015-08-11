@@ -16,16 +16,16 @@ const int QVN = 1005;
 const int PVN = 50005;
 const int QFN = 1005;
 struct num {
-	int id;//1 2 3 4 5 6 int float high fraction #t#f string 
+	int id;//1 2 3 4 5 6 7 int float high fraction #t#f string func
 	int intnum;
 	double floatnum;
 	bool zf;
 	int a[105] = {0};
 	int fz, fm;
 	bool tf;
-	string name;
-	string str;
-	string later;//save what should be get value, id = 0
+	string name;//var name
+	string str;//string type
+	string later;//id = 0 : save what should be get value; id = 7 : funcname
 	num () {
 		id = 0;
 		intnum = 0;
@@ -68,6 +68,8 @@ struct num {
 			tf = c.tf;
 		} else if (id == 6) {
 			str = c.str;
+		} else {
+			later = c.later;
 		}
 		return *this;
 	}
@@ -85,7 +87,7 @@ struct num {
 	bool operator<(const num &b) const;
 };
 
-num tru, fals;
+num tru, fals, stfun;
 num var[QVN];
 int tot = 0;
 num pvar[PVN];
@@ -201,6 +203,8 @@ bool num::operator==(const num &c) const {
 			if (a.a[i] != b.a[i]) return 0;
 		}
 		return 1;
+	} else if (a.id == 7) {
+		return b.id == 7;
 	} else {
 		return a.str == b.str;
 	}
@@ -733,6 +737,12 @@ num getvalue(string s, int yl, int yr) {
 		return pvar[findpname(s, yl, yr)];
 	} else if (findname(s)) {
 		return var[findname(s)];
+	} else if (findfunc(s)) {
+		num f;
+		f.id = 7;
+		f.later = fname[findfunc(s)];
+		//cout << "muQ? " << f.later << endl;
+		return f;
 	} else if (isop(s[1]) || isaon(s)) {
 		int k1, k2, k3;
 		k1 = getnex(s, 0), k2 = getnex(s, k1), k3 = getnex(s, k2);
@@ -831,15 +841,35 @@ num getvalue(string s, int yl, int yr) {
 		//	cout << "var " << y1 << endl;
 		}
 		//getvalue(every element);
+		string z = func[fr];
+		//(* x x)
 		if (pr > pl) {
 			for (int i = pl + 1; i <= pr; i++) {
 				k1 = k2, k2 = getnex(s, k1);
 				s1.assign(s, k1 + 1, k2 - k1 - 1);
 				pvar[i] = getvalue(s1, yl, yr);
+				if (pvar[i].id == 7) {
+					//cout << "www " << pvar[i].name << ' ' << pvar[i].later << endl;
+					string y = pvar[i].name, x = pvar[i].later;
+					int l1 = z.length(), l2 = pvar[i].name.length(), p1, p2;
+					for (int j = 0; j < l1; j++) {
+						p1 = j;
+						for (p2 = 0; p1 < l1 && p2 < l2; p1++, p2++) {
+							if (z[p1] != y[p2]) {
+								break;
+							}
+						}
+						if (p2 == l2) {
+							z.replace(j, l2, x);
+							l1 = z.length();
+						}
+					}
+					//cout << "z " << z << endl;
+				}
+				//system("pause");
 		//		cout << "pvar " << pvar[i] << endl;
 			}
 		}
-		string z = func[fr];//(* x x)
 		//cout << "func " << z << endl;
 		k1 = -1, k2 = getnex(z, k1);
 		num a;
@@ -851,7 +881,7 @@ num getvalue(string s, int yl, int yr) {
 			if (z[k2] != ' ') break;
 			k1 = k2, k2 = getnex(z, k1);
 		//	cout << "1cget\n";
-	//		cout << "zk1" << z[k1] << "zk1+1" << z[k1+1] << endl;
+		//	cout << "zk1" << z[k1] << "zk1+1" << z[k1+1] << endl;
 		}
 		if (pr == ptot) {
 			ptot = pl;
@@ -867,6 +897,7 @@ int main() {
 	pref[2] = "newline";
 	pref[3] = "quotient";
 	pref[4] = "modulo";
+	stfun.id = 7;
 	string s, s1;
 	s.clear();
 	char forgets[1005];
@@ -987,21 +1018,4 @@ int main() {
 	return 0;
 }
 /*
-(define (count-change amount)
-  (cc amount 5))
-(define (cc amount kinds-of-coins)
-  (cond ((= amount 0) 1)
-        ((or (< amount 0) (= kinds-of-coins 0)) 0)
-        (else (+ (cc amount
-                     (- kinds-of-coins 1))
-                 (cc (- amount
-                      (first-denomination kinds-of-coins))
-                     kinds-of-coins)))))
-(define (first-denomination kinds-of-coins)
-  (cond ((= kinds-of-coins 1) 1)
-        ((= kinds-of-coins 2) 5)
-        ((= kinds-of-coins 3) 10)
-        ((= kinds-of-coins 4) 25)
-        ((= kinds-of-coins 5) 50)))
-(count-change 79)
 */
