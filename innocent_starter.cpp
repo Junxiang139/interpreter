@@ -12,8 +12,7 @@ try to apply plus in integer
 #include<string>
 #pragma comment(linker, "/STACK:102400000,10240000")  
 using namespace std;
-const int QVN = 1005;
-const int PVN = 50005;
+const int QVN = 50005;
 const int QFN = 1005;
 struct num {
 	int id;//1 2 3 4 5 6 7 int float high fraction #t#f string func
@@ -89,14 +88,12 @@ struct num {
 
 num tru, fals, stfun;
 num var[QVN];
-int tot = 0;
-num pvar[PVN];
-int ptot = 0;
+int tot = 0, bkv = 0;
 
 string fname[QFN];
 string fmat[QFN];
 string func[QFN];
-int ftot = 0;
+int ftot = 0, bkf = 0;
 
 num cintnum(const num &b) {
 	num a;
@@ -648,8 +645,18 @@ num calcv(num a, num b, char c) {
 	return a;
 }
 
-int findname(string s) {//for var 
-	for (int i = 1; i <= tot; i++) {
+int findname(string s, int yl = 0, int yr = 0) {//for var 
+	//cout << "bkv " << bkv << endl;
+	for (int i = 1; i <= bkv; i++) {
+		if (var[i].name == s) {
+			//cout << "?" << endl;
+			if (var[i].id == 0) {
+				var[i] = getvalue(var[i].later);
+			}
+			return i;
+		}
+	}
+	for (int i = yl + 1; i <= yr; i++) {
 		if (var[i].name == s) {
 			if (var[i].id == 0) {
 				var[i] = getvalue(var[i].later);
@@ -659,6 +666,7 @@ int findname(string s) {//for var
 	}
 	return 0;
 }
+/*
 int findpname(string s, int pl, int pr) {//for part var
 	for (int i = pl + 1; i <= pr; i++) {
 		if (pvar[i].name == s) {
@@ -667,6 +675,7 @@ int findpname(string s, int pl, int pr) {//for part var
 	}
 	return 0;
 }
+*/
 int findfunc(string s) {
 	for (int i = 1; i <= ftot; i++) {
 		if (fname[i] == s) {
@@ -731,12 +740,12 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 	return a;
 }
 num getvalue(string s, int yl, int yr) {
+	//cout << s << endl;
+	//system("pause");
 	if (numon(s)) {
 		return numv(s);
-	} else if (yr > yl && findpname(s, yl, yr)) {
-		return pvar[findpname(s, yl, yr)];
-	} else if (findname(s)) {
-		return var[findname(s)];
+	} else if (findname(s, yl, yr)) {
+		return var[findname(s, yl, yr)];
 	} else if (findfunc(s)) {
 		num f;
 		f.id = 7;
@@ -827,7 +836,7 @@ num getvalue(string s, int yl, int yr) {
 		*/
 		
 		//define var
-		int pl = ptot, pr = ptot;//range of ptot
+		int pl = tot, pr = tot;//range of ptot
 		string y = fmat[fr];//(square x)
 		string y1;
 		//cout << "y " << y << endl;
@@ -836,8 +845,8 @@ num getvalue(string s, int yl, int yr) {
 		while (y[x2] == ' ') {
 			x1 = x2, x2 = getnex(y, x1);
 			y1.assign(y, x1 + 1, x2 - x1 - 1);
-			ptot++, pr = ptot;
-			pvar[pr].name = y1;
+			tot++, pr = tot;
+			var[pr].name = y1;
 		//	cout << "var " << y1 << endl;
 		}
 		//getvalue(every element);
@@ -847,11 +856,11 @@ num getvalue(string s, int yl, int yr) {
 			for (int i = pl + 1; i <= pr; i++) {
 				k1 = k2, k2 = getnex(s, k1);
 				s1.assign(s, k1 + 1, k2 - k1 - 1);
-				pvar[i] = getvalue(s1, yl, yr);
-				if (pvar[i].id == 7) {
-					//cout << "www " << pvar[i].name << ' ' << pvar[i].later << endl;
-					string y = pvar[i].name, x = pvar[i].later;
-					int l1 = z.length(), l2 = pvar[i].name.length(), p1, p2;
+				var[i] = getvalue(s1, yl, yr);
+				if (var[i].id == 7) {
+					//cout << "www " << var[i].name << ' ' << var[i].later << endl;
+					string y = var[i].name, x = var[i].later;
+					int l1 = z.length(), l2 = var[i].name.length(), p1, p2;
 					for (int j = 0; j < l1; j++) {
 						p1 = j;
 						for (p2 = 0; p1 < l1 && p2 < l2; p1++, p2++) {
@@ -877,14 +886,14 @@ num getvalue(string s, int yl, int yr) {
 			s2.assign(z, k1 + 1, k2 - k1 - 1);
 			//cout << "s2 " << s2 << endl;
 			if (pr > pl) a = getvalue(s2, pl, pr);
-			else a = getvalue(s2);
+			else a = getvalue(s2, yl, yr);
 			if (z[k2] != ' ') break;
 			k1 = k2, k2 = getnex(z, k1);
 		//	cout << "1cget\n";
 		//	cout << "zk1" << z[k1] << "zk1+1" << z[k1+1] << endl;
 		}
-		if (pr == ptot) {
-			ptot = pl;
+		if (pr == tot) {
+			tot = pl;
 		}
 		return a;
 		//cout << sf << endl;
@@ -972,9 +981,10 @@ int main() {
 		}
 		
 		}
+		
 		//cout << s << endl;
 		//define
-		ptot = 0;
+		bkv = tot, bkf = ftot;
 		if (s.length() >= 8) {
 			string s2 (s, 1, 6), s3;
 			if (s2 == "define") {
@@ -982,6 +992,7 @@ int main() {
 				if (s[k1 + 1] == '(') {
 					k1 = 9, k2 = getnex(s, k1);
 					ftot++;
+					bkf = ftot;
 					fname[ftot].assign(s, k1, k2 - k1);
 					k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
 					fmat[ftot].assign(s, k1 + 1, k2 - k1 - 1);
@@ -993,10 +1004,13 @@ int main() {
 					}
 					//cout << fname[ftot] << endl << fmat[ftot] << endl << func[ftot] << endl;
 					s.clear();
+					tot = bkv, ftot = bkf;
+					//cout << ftot << endl;
 					//cout << "once" << endl;
 					continue;
 				}
 				tot++;
+				bkv = tot;
 				s2.assign(s, k1 + 1, k2 - k1 - 1);
 				var[tot].name = s2;
 				s2.assign(s, k2 + 1, k3 - k2 - 1);
@@ -1004,14 +1018,20 @@ int main() {
 				var[tot].later = s2;
 				//cout << getvalue(s2) << endl;
 				s.clear();
+				tot = bkv, ftot = bkf;
+				//cout << ftot << endl;
 			} else {
 				cout << getvalue(s) << endl;
 				s.clear();
+				tot = bkv, ftot = bkf;
 			}
 		} else if (!s.empty()) {
 			cout << getvalue(s) << endl;
 			s.clear();
+			tot = bkv, ftot = bkf;
 		}
+		tot = bkv, ftot = bkf;
+		//cout << ftot << endl;
 		//cout << tot << endl << ptot << endl << ftot << endl;
 		//cout << "once" << endl;
 	}
