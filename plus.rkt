@@ -36,12 +36,14 @@
                  (- counter 1)
                  (* b product))))
 (define (square x) (* x x))
+(define (even1? n) (= (modulo n 2) 0))
 (define (fast-expt1 b n)
   (cond ((= n 0) 1)
         ((even1? n) (square (fast-expt1 b (/ n 2))))
         (else (* b (fast-expt1 b (- n 1))))))
-(define (even1? n)
-  (= (modulo n 2) 0))
+(expt1 2 100)
+(expt2 2 100)
+(fast-expt1 2 100)
 (modulo 100 27)
 
 (define (fib n)
@@ -51,8 +53,7 @@
                (fib (- n 2))))))
 (fib 5)
 (fib 20)
-(fib 32)
-
+(define unuse (fib 10000000))
 (define (sum term a next b)
   (if (> a b)
       0
@@ -69,4 +70,5 @@
   (define (pi-next x)
     (+ x 4))
   (sum pi-term a pi-next b))
+(* 8 (pi-sum 1 1000))
 (eqv? 2 2)

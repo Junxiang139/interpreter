@@ -647,17 +647,17 @@ num calcv(num a, num b, char c) {
 
 int findname(string s, int yl = 0, int yr = 0) {//for var 
 	//cout << "bkv " << bkv << endl;
-	for (int i = 1; i <= bkv; i++) {
+	for (int i = yr; i > yl; i--) {
 		if (var[i].name == s) {
-			//cout << "?" << endl;
 			if (var[i].id == 0) {
 				var[i] = getvalue(var[i].later);
 			}
 			return i;
 		}
 	}
-	for (int i = yl + 1; i <= yr; i++) {
+	for (int i = 1; i <= bkv; i++) {
 		if (var[i].name == s) {
+			//cout << "?" << endl;
 			if (var[i].id == 0) {
 				var[i] = getvalue(var[i].later);
 			}
@@ -677,7 +677,7 @@ int findpname(string s, int pl, int pr) {//for part var
 }
 */
 int findfunc(string s) {
-	for (int i = 1; i <= ftot; i++) {
+	for (int i = ftot; i >= 1; i--) {
 		if (fname[i] == s) {
 			return i;
 		}
@@ -739,6 +739,28 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 	}
 	return a;
 }
+/*
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+(define (pi-term x)
+    (/ 1.0 (* x (+ x 2))))
+(define (pi-next x)
+    (+ x 4))
+(define (pi-sum a b)
+  (sum pi-term a pi-next b))
+(* 8 (pi-sum 1 10))
+
+(define (pi-sum a b)
+  (define (pi-term x)
+    (/ 1.0 (* x (+ x 2))))
+  (define (pi-next x)
+    (+ x 4))
+  (sum pi-term a pi-next b))
+(* 8 (pi-sum 1 1000))
+*/
 num getvalue(string s, int yl, int yr) {
 	//cout << s << endl;
 	//system("pause");
@@ -757,7 +779,7 @@ num getvalue(string s, int yl, int yr) {
 		k1 = getnex(s, 0), k2 = getnex(s, k1), k3 = getnex(s, k2);
 		string s1 (s, k1 + 1, k2 - k1 - 1), s2;
 		if (s[1] == 'n') {
-			num ans = getvalue(s1);
+			num ans = getvalue(s1, yl, yr);
 			ans.tf = !ans.tf;
 			return ans;
 		}
@@ -823,6 +845,31 @@ num getvalue(string s, int yl, int yr) {
 					return d;
 				}
 			}
+		} else if (s1 == "define") {
+			num a;
+			int k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
+			string s3;
+			if (s[k1 + 1] == '(') {
+				k1 = 9, k2 = getnex(s, k1);
+				ftot++;
+				fname[ftot].assign(s, k1, k2 - k1);
+				k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
+				fmat[ftot].assign(s, k1 + 1, k2 - k1 - 1);
+				func[ftot].assign(s, k2 + 1, k3 - k2 - 1);
+				while (s[k3] == ' ') {
+					k2 = k3, k3 = getnex(s, k3);
+					s3.assign(s, k2 + 1, k3 - k2 - 1), s3 = ' ' + s3;
+					func[ftot] += s3;
+				}
+				return a;
+			}
+			tot++;
+			bkv = tot;
+			s2.assign(s, k1 + 1, k2 - k1 - 1);
+			var[tot].name = s2;
+			s2.assign(s, k2 + 1, k3 - k2 - 1);
+			var[tot].later = s2;
+			return a;
 		} else if (ispref(s1)) {
 			return calcpref(s, s1, yl, yr);
 		}
@@ -870,6 +917,7 @@ num getvalue(string s, int yl, int yr) {
 						}
 						if (p2 == l2) {
 							z.replace(j, l2, x);
+							j = j - l2 + x.length();
 							l1 = z.length();
 						}
 					}
@@ -895,6 +943,8 @@ num getvalue(string s, int yl, int yr) {
 		if (pr == tot) {
 			tot = pl;
 		}
+		//cout << "s " << s << endl;
+		//cout << "a " << a << endl;
 		return a;
 		//cout << sf << endl;
 	}
