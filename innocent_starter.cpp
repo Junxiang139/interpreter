@@ -13,7 +13,7 @@ try to apply plus in integer
 #pragma comment(linker, "/STACK:102400000,10240000")  
 using namespace std;
 const int QVN = 50005;
-const int QFN = 1005;
+const int QFN = 50005;
 struct num {
 	int id;//1 2 3 4 5 6 7 int float high fraction #t#f string func
 	int intnum;
@@ -179,7 +179,15 @@ num cfranum(const num &b) {
 	}
 	return a;
 }
-
+string cstr(int v) {
+	string s;
+	s += 'f';
+	while (v) {
+		s += (v % 10) + '0';
+		v /= 10;
+	}
+	return s;
+}
 bool num::operator==(const num &c) const {
 	num a = *this, b = c;
 	if (a.id == 1 && b.id == 1) {
@@ -746,26 +754,18 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 	return a;
 }
 /*
+(define (cube x) (* x x x))
 (define (sum term a next b)
   (if (> a b)
       0
       (+ (term a)
          (sum term (next a) next b))))
-(define (pi-term x)
-    (/ 1.0 (* x (+ x 2))))
-(define (pi-next x)
-    (+ x 4))
-(define (pi-sum a b)
-  (sum pi-term a pi-next b))
-(* 8 (pi-sum 1 10))
-
-(define (pi-sum a b)
-  (define (pi-term x)
-    (/ 1.0 (* x (+ x 2))))
-  (define (pi-next x)
-    (+ x 4))
-  (sum pi-term a pi-next b))
-(* 8 (pi-sum 1 1000))
+(define (integral f a b dx)
+  (* (sum f (+ a (/ dx 2.0))
+          (lambda (x) (+ x dx))
+          b)
+     dx))
+(integral cube 0 1 0.01)
 */
 num getvalue(string s, int yl, int yr) {
 	//cout << "sss " << s << endl;
@@ -775,6 +775,7 @@ num getvalue(string s, int yl, int yr) {
 	} else if (findfunc(s)) {
 		num f;
 		f.id = 7;
+		//f.name = fname[findfunc(s)];
 		f.later = fname[findfunc(s)];
 		//cout << "muQ? " << f.later << endl;
 		return f;
@@ -880,6 +881,42 @@ num getvalue(string s, int yl, int yr) {
 			s2.assign(s, k2 + 1, k3 - k2 - 1);
 			var[tot].later = s2;
 			return a;
+		} else if (s1 == "lambda") {
+			//(lambda (x) (/ 1.0 (* x (+ x 2))))
+			//(define (ftot x) (/ 1.0 (* x (+ x 2))))
+			num a;
+			int k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
+			string s3, nam;
+			ftot++;
+			nam = cstr(ftot);
+			/*
+			k1 = 9, k2 = getnex(s, k1);
+			fname[ftot].assign(s, k1, k2 - k1);
+			*/
+			//cout << "f " << fname[ftot] << endl;
+			fname[ftot] = nam;
+			nam += ' ';
+			k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
+			fmat[ftot].assign(s, k1 + 1, k2 - k1 - 1);
+			fmat[ftot].insert(1, nam);
+			//cout << "s  " << s << endl;
+			//cout << "fm " << fmat[ftot] << endl;
+			//cout << "fn " << fname[ftot] << endl;
+			func[ftot].assign(s, k2 + 1, k3 - k2 - 1);
+			while (s[k3] == ' ') {
+				k2 = k3, k3 = getnex(s, k3);
+				s3.assign(s, k2 + 1, k3 - k2 - 1), s3 = ' ' + s3;
+				func[ftot] += s3;
+			}
+			//cout << "fu " << func[ftot] << endl;
+			num f;
+			f.id = 7;
+			//f.name = fname[ftot];
+			f.later = fname[ftot];
+			//cout << "fn " << f.name << endl;
+			//cout << "fl " << f.later << endl;
+			//cout << "muQ? " << f.later << endl;
+			return f;
 		} else if (ispref(s1)) {
 			return calcpref(s, s1, yl, yr);
 		}
@@ -893,6 +930,7 @@ num getvalue(string s, int yl, int yr) {
 		*/
 		
 		//define var
+		int pf = ftot;
 		int pl = tot, pr = tot;//range of ptot
 		string y = fmat[fr];//(square x)
 		string y1;
@@ -905,7 +943,7 @@ num getvalue(string s, int yl, int yr) {
 			tot++, pr = tot;
 			num e;
 			var[tot] = e;
-			var[pr].name = y1;
+			var[tot].name = y1;
 		//	cout << "var " << y1 << endl;
 		}
 		//getvalue(every element);
@@ -921,8 +959,11 @@ num getvalue(string s, int yl, int yr) {
 				//system("pause");
 				if (var[i].id == 7) {
 					//cout << "www " << var[i].name << ' ' << var[i].later << endl;
-					string y = var[i].name, x = var[i].later;
-					int l1 = z.length(), l2 = var[i].name.length(), p1, p2;
+					//cout << "zpre " << z << endl;
+					string x = var[i].later, y = var[i].name;
+					//cout << "y " << y << endl;
+					//cout << "x " << x << endl;
+					int l1 = z.length(), l2 = y.length(), p1, p2;
 					for (int j = 0; j < l1; j++) {
 						p1 = j;
 						for (p2 = 0; p1 < l1 && p2 < l2; p1++, p2++) {
@@ -930,12 +971,15 @@ num getvalue(string s, int yl, int yr) {
 								break;
 							}
 						}
-						if (p2 == l2 && (p1 == l1 || z[p1] == ' ')) {
+						if (p2 == l2 && (p1 == l1 || z[p1] == ' ') && 
+						(z[j - 1] == '(' || z[j - 1] == ' ')) {
 							z.replace(j, l2, x);
 							j = j - l2 + x.length();
 							l1 = z.length();
 						}
 					}
+					//cout << "znex " << z << endl;
+					//system("pause");
 					//cout << "z " << z << endl;
 				}
 				//system("pause");
@@ -958,6 +1002,7 @@ num getvalue(string s, int yl, int yr) {
 		if (pr == tot) {
 			tot = pl;
 		}
+		ftot = pf;
 		//cout << "s " << s << endl;
 		//cout << "a " << a << endl;
 		return a;
@@ -1085,12 +1130,12 @@ int main() {
 				tot = bkv, ftot = bkf;
 				//cout << ftot << endl;
 			} else {
-				a = getvalue(s);
+				cout << getvalue(s) << endl;
 				s.clear();
 				tot = bkv, ftot = bkf;
 			}
 		} else if (!s.empty()) {
-			//cout << getvalue(s) << endl;
+			cout << getvalue(s) << endl;
 			s.clear();
 			tot = bkv, ftot = bkf;
 		}
@@ -1103,4 +1148,16 @@ int main() {
 	return 0;
 }
 /*
+(define (cube x) (* x x x))
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+(define (integral f a b dx)
+  (* (sum f (+ a (/ dx 2.0))
+          (lambda (x) (+ x dx))
+          b)
+     dx))
+(integral cube 0 1 0.01)
 */
