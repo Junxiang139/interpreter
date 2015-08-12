@@ -53,15 +53,15 @@
                (fib (- n 2))))))
 (fib 5)
 (fib 20)
-(define unuse (fib 10000000))
+
 (define (sum term a next b)
   (if (> a b)
       0
       (+ (term a)
          (sum term (next a) next b))))
-(define (inc n) (+ n 1))
-(define (cube n) (* n n n))
 (define (sum-cubes a b)
+  (define (inc n) (+ n 1))
+  (define (cube n) (* n n n))
   (sum cube a inc b))
 (sum-cubes 1 10)
 (define (pi-sum a b)
@@ -72,3 +72,4 @@
   (sum pi-term a pi-next b))
 (* 8 (pi-sum 1 1000))
 (eqv? 2 2)
+(display 1)

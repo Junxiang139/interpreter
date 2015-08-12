@@ -465,6 +465,8 @@ ostream& operator<<(ostream &os, const num &obj) {
 		}
 	} else if (obj.id == 6) {
 		os << obj.str;
+	} else {
+		os << "";
 	}
 }
 
@@ -647,7 +649,8 @@ num calcv(num a, num b, char c) {
 
 int findname(string s, int yl = 0, int yr = 0) {//for var 
 	//cout << "bkv " << bkv << endl;
-	for (int i = yr; i > yl; i--) {
+	if (yr < bkv) yr = bkv;
+	for (int i = yr; i > 1; i--) {
 		if (var[i].name == s) {
 			if (var[i].id == 0) {
 				var[i] = getvalue(var[i].later);
@@ -655,6 +658,7 @@ int findname(string s, int yl = 0, int yr = 0) {//for var
 			return i;
 		}
 	}
+	/*
 	for (int i = 1; i <= bkv; i++) {
 		if (var[i].name == s) {
 			//cout << "?" << endl;
@@ -665,6 +669,7 @@ int findname(string s, int yl = 0, int yr = 0) {//for var
 		}
 	}
 	return 0;
+	*/
 }
 /*
 int findpname(string s, int pl, int pr) {//for part var
@@ -966,72 +971,69 @@ int main() {
 	tru.id = fals.id = 5;
 	tru.tf = 1, fals.tf = 0;
 	//preend
-	int predefine = 3;
+	int predefine = 4;
 	int cpre = 0;
 	while (1) {
 		if (cpre < predefine) {
-		
-		cpre++;
-		if (cpre == 1) {
-			s = "(define #t 0)";
-		} else if (cpre == 2) {
-			s = "(define #f 0)";
+			cpre++;
+			if (cpre == 1) {
+				s = "(define #t 0)";
+			} else if (cpre == 2) {
+				s = "(define #f 0)";
+			} else if (cpre == 3) {
+				s = "(define (abs x) (if (> x 0) x (- 0 x)))";
+			} else {
+				var[1].id = 5;
+				var[1].tf = 1;
+				var[2].id = 5;
+				var[2].tf = 0;
+			}	
 		} else {
-			var[1].id = 5;
-			var[1].tf = 1;
-			var[2].id = 5;
-			var[2].tf = 0;
-		}
-		
-		} else {
-		
-		gets(forgets);
-		s += forgets;
-		if (s == "Requiescat in pace") break;
-		calclr(s);
-		if (lbra != rbra) continue;
-		bool dd = 1;
-		string::iterator ti, it;
-		it = s.begin();
-		while (it != s.end() && !(dd == 1 && (*it) == ';')) {
-			if ((*it) == '"') dd = !dd;
-			it++;
-		}
-		if ((*it) == ';') {
-			while (it != s.end()) {
+			gets(forgets);
+			s += forgets;
+			if (s == "Requiescat in pace") break;
+			calclr(s);
+			if (lbra != rbra) continue;
+			bool dd = 1;
+			string::iterator ti, it;
+			it = s.begin();
+			while (it != s.end() && !(dd == 1 && (*it) == ';')) {
+				if ((*it) == '"') dd = !dd;
+				it++;
+			}
+			if ((*it) == ';') {
+				while (it != s.end()) {
+					s.erase(it);
+				}
+				//cout << s << endl;
+			}
+			it = s.begin();
+			while (*it == ' ' && !s.empty()) {
 				s.erase(it);
 			}
-			//cout << s << endl;
-		}
-		it = s.begin();
-		while (*it == ' ' && !s.empty()) {
-			s.erase(it);
-		}
-		ti = s.end() - 1;
-		while (*ti == ' ' && !s.empty()) {
-			s.erase(ti);
-			ti--;
-		}
-		dd = 1;
-		if (!s.empty()) {
-			for (ti = s.begin(), it = ti + 1; it != s.end(); ti = it, it++) {
-				if (*it == '"') dd = !dd;
-				if (dd && (*ti) == ' ' && (*it) == ' ') {
-					s.erase(it);
-					//cout << *ti << *it << "h\n";
-					it--;
-				} else if (dd && (*ti) == '(' && (*it) == ' ') {
-					s.erase(it);
-					it--;
-				} else if (dd && (*ti) == ' ' && (*it) == ')') {
-					s.erase(ti);
-					it--, it--;
+			ti = s.end() - 1;
+			while (*ti == ' ' && !s.empty()) {
+				s.erase(ti);
+				ti--;
+			}
+			dd = 1;
+			if (!s.empty()) {
+				for (ti = s.begin(), it = ti + 1; it != s.end(); ti = it, it++) {
+					if (*it == '"') dd = !dd;
+					if (dd && (*ti) == ' ' && (*it) == ' ') {
+						s.erase(it);
+						//cout << *ti << *it << "h\n";
+						it--;
+					} else if (dd && (*ti) == '(' && (*it) == ' ') {
+						s.erase(it);
+						it--;
+					} else if (dd && (*ti) == ' ' && (*it) == ')') {
+						s.erase(ti);
+						it--, it--;
+					}
 				}
 			}
 		}
-		
-		}
-		
 		//cout << s << endl;
 		//define
 		bkv = tot, bkf = ftot;
