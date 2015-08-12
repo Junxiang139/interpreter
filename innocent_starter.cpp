@@ -465,8 +465,8 @@ ostream& operator<<(ostream &os, const num &obj) {
 		}
 	} else if (obj.id == 6) {
 		os << obj.str;
-	} else {
-		os << "";
+	} else if (obj.id == 7) {
+		os << obj.later;
 	}
 }
 
@@ -650,11 +650,12 @@ num calcv(num a, num b, char c) {
 int findname(string s, int yl = 0, int yr = 0) {//for var 
 	//cout << "bkv " << bkv << endl;
 	if (yr < bkv) yr = bkv;
-	for (int i = yr; i > 1; i--) {
+	for (int i = yr; i >= 1; i--) {
 		if (var[i].name == s) {
 			if (var[i].id == 0) {
-				var[i] = getvalue(var[i].later);
+				var[i] = getvalue(var[i].later, yl, yr);
 			}
+			//cout << var[i].name << ' ' << var[i] << endl;
 			return i;
 		}
 	}
@@ -767,18 +768,19 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 (* 8 (pi-sum 1 1000))
 */
 num getvalue(string s, int yl, int yr) {
-	//cout << s << endl;
+	//cout << "sss " << s << endl;
 	//system("pause");
 	if (numon(s)) {
-		return numv(s);
-	} else if (findname(s, yl, yr)) {
-		return var[findname(s, yl, yr)];
+		return numv(s); 
 	} else if (findfunc(s)) {
 		num f;
 		f.id = 7;
 		f.later = fname[findfunc(s)];
 		//cout << "muQ? " << f.later << endl;
 		return f;
+	} else if (findname(s, yl, yr)) {
+		//cout << var[findname(s, yl, yr)].name << ' ' << var[findname(s, yl, yr)] << endl;
+		return var[findname(s, yl, yr)];
 	} else if (isop(s[1]) || isaon(s)) {
 		int k1, k2, k3;
 		k1 = getnex(s, 0), k2 = getnex(s, k1), k3 = getnex(s, k2);
@@ -858,6 +860,7 @@ num getvalue(string s, int yl, int yr) {
 				k1 = 9, k2 = getnex(s, k1);
 				ftot++;
 				fname[ftot].assign(s, k1, k2 - k1);
+				//cout << "f " << fname[ftot] << endl;
 				k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
 				fmat[ftot].assign(s, k1 + 1, k2 - k1 - 1);
 				func[ftot].assign(s, k2 + 1, k3 - k2 - 1);
@@ -869,6 +872,8 @@ num getvalue(string s, int yl, int yr) {
 				return a;
 			}
 			tot++;
+			num e;
+			var[tot] = e;
 			bkv = tot;
 			s2.assign(s, k1 + 1, k2 - k1 - 1);
 			var[tot].name = s2;
@@ -898,6 +903,8 @@ num getvalue(string s, int yl, int yr) {
 			x1 = x2, x2 = getnex(y, x1);
 			y1.assign(y, x1 + 1, x2 - x1 - 1);
 			tot++, pr = tot;
+			num e;
+			var[tot] = e;
 			var[pr].name = y1;
 		//	cout << "var " << y1 << endl;
 		}
@@ -909,6 +916,9 @@ num getvalue(string s, int yl, int yr) {
 				k1 = k2, k2 = getnex(s, k1);
 				s1.assign(s, k1 + 1, k2 - k1 - 1);
 				var[i] = getvalue(s1, yl, yr);
+				//cout << s << endl;
+				//cout << "here " << var[i].name << ' ' << var[i] << ' ' << s1 << endl;
+				//system("pause");
 				if (var[i].id == 7) {
 					//cout << "www " << var[i].name << ' ' << var[i].later << endl;
 					string y = var[i].name, x = var[i].later;
@@ -920,7 +930,7 @@ num getvalue(string s, int yl, int yr) {
 								break;
 							}
 						}
-						if (p2 == l2) {
+						if (p2 == l2 && (p1 == l1 || z[p1] == ' ')) {
 							z.replace(j, l2, x);
 							j = j - l2 + x.length();
 							l1 = z.length();
@@ -1063,6 +1073,8 @@ int main() {
 				}
 				tot++;
 				bkv = tot;
+				num e;
+				var[tot] = e;
 				s2.assign(s, k1 + 1, k2 - k1 - 1);
 				var[tot].name = s2;
 				s2.assign(s, k2 + 1, k3 - k2 - 1);
@@ -1073,16 +1085,17 @@ int main() {
 				tot = bkv, ftot = bkf;
 				//cout << ftot << endl;
 			} else {
-				cout << getvalue(s) << endl;
+				a = getvalue(s);
 				s.clear();
 				tot = bkv, ftot = bkf;
 			}
 		} else if (!s.empty()) {
-			cout << getvalue(s) << endl;
+			//cout << getvalue(s) << endl;
 			s.clear();
 			tot = bkv, ftot = bkf;
 		}
 		tot = bkv, ftot = bkf;
+		//cout << tot << ftot << endl;
 		//cout << ftot << endl;
 		//cout << tot << endl << ptot << endl << ftot << endl;
 		//cout << "once" << endl;
