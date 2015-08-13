@@ -669,6 +669,7 @@ int findname(string s, int yl = 0, int yr = 0) {//for var
 			return i;
 		}
 	}
+	return 0;
 	/*
 	for (int i = 1; i <= bkv; i++) {
 		if (var[i].name == s) {
@@ -756,19 +757,8 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 	return a;
 }
 /*
-(define (cube x) (* x x x))
-(define (sum term a next b)
-  (if (> a b)
-      0
-      (+ (term a)
-         (sum term (next a) next b))))
-(define (integral f a b dx)
-  (* (sum f (+ a (/ dx 2.0))
-          (lambda (x) (+ x dx))
-          b)
-     dx))
-(integral cube 0 1 0.01)
-((lambda (x y z) (+ x y (* z z))) 1 2 3)
+(define (f g) (g 2))
+(f (lambda (z) (* z (+ z 1))))
 */
 num getvalue(string s, int yl, int yr) {
 	//cout << "sss " << s << endl;
@@ -783,6 +773,7 @@ num getvalue(string s, int yl, int yr) {
 		//cout << "muQ? " << f.later << endl;
 		return f;
 	} else if (findname(s, yl, yr)) {
+		//cout << "fyr " << yr << " " << findname(s, yl, yr) << endl;
 		//cout << var[findname(s, yl, yr)].name << ' ' << var[findname(s, yl, yr)] << endl;
 		return var[findname(s, yl, yr)];
 	} else if (isop(s[1]) || isaon(s)) {
@@ -797,6 +788,7 @@ num getvalue(string s, int yl, int yr) {
 		s2.assign(s, k2 + 1, k3 - k2 - 1);
 		//cout << "s1 " << s1 << endl << "s2 " << s2 << endl << endl;
 		num v1 = getvalue(s1, yl, yr), v2 = getvalue(s2, yl, yr), v3;
+		//if (s[1] == '+') cout << "yr " << yr << endl;
 		v3 = v1;
 		v1 = calcv(v3, v2, s[1]);
 		if (s[1] == '=' || s[1] == '<' || s[1] == '>') {
@@ -920,6 +912,41 @@ num getvalue(string s, int yl, int yr) {
 			//cout << "fl " << f.later << endl;
 			//cout << "muQ? " << f.later << endl;
 			return f;
+		} else if (s1 == "let" || s1 == "let*" || s1 == "letrec") {
+			//(define (f x y) (let ((a (+ x y)) (b (* x y))) (+ a b)))
+			k3 = getnex(s, k2);
+			//cout << "spp " << s << endl;
+			s.erase(k3 - 1, 1);
+			s.erase(s.length() - 1, 1);
+			s.erase(0, k2 - k1 + 2);
+			k3 -= (k2 - k1 + 2);
+			//cout << "sp " << s << endl;
+			string de = "define ";
+			int len = s.length(), cr = 0;
+			for (int i = 0; i < k3; i++) {
+				if (cr == 0 && s[i] == '(') {
+					cr++;
+					s.insert(i + 1, de);
+					i += 7, k3 += 7;
+				} else if (s[i] == '(') {
+					cr++;
+				} else if (s[i] == ')') {
+					cr--;
+				}
+			}
+			//cout << "s " << s << endl;
+			k1 = -1, k2 = getnex(s, k1);
+			num a;
+			int pf = ftot, pl = tot, pr = tot;
+			while (1) {
+				s2.assign(s, k1 + 1, k2 - k1 - 1);
+				a = getvalue(s2, yl, yr);
+				if (s[k2] != ' ') break;
+				k1 = k2, k2 = getnex(s, k1);
+			}
+			tot = pl;
+			ftot = pf;
+			return a;
 		} else if (ispref(s1)) {
 			return calcpref(s, s1, yl, yr);
 		}
@@ -929,8 +956,8 @@ num getvalue(string s, int yl, int yr) {
 			num la = getvalue(s1);
 			if (la.id == 7) {
 				string x = la.later, y = s1;
-				cout << "y " << y << endl;
-				cout << "x " << x << endl;
+				//cout << "y " << y << endl;
+				//cout << "x " << x << endl;
 				int l1 = s.length(), l2 = y.length(), p1, p2;
 				for (int j = 0; j < l1; j++) {
 					p1 = j;
@@ -946,7 +973,7 @@ num getvalue(string s, int yl, int yr) {
 						l1 = s.length();
 					}
 				}
-				cout << "s " << s << endl;
+				//cout << "s " << s << endl;
 				k1 = 1, k2 = getnex(s, k1);
 				fr = findfunc(x);
 				//cout << "znex " << z << endl;
@@ -980,6 +1007,9 @@ num getvalue(string s, int yl, int yr) {
 		}
 		//getvalue(every element);
 		string z = func[fr];
+		//cout << "s " << s << endl;
+		//cout << "y " << y << endl;
+		//cout << "z " << z << endl;
 		//(* x x)
 		if (pr > pl) {
 			for (int i = pl + 1; i <= pr; i++) {
@@ -1026,6 +1056,10 @@ num getvalue(string s, int yl, int yr) {
 			//cout << "s2 " << s2 << endl;
 			if (pr > pl) a = getvalue(s2, pl, pr);
 			else a = getvalue(s2, yl, yr);
+			//cout << "a " << a << endl;
+			//cout << "pr " << pr << endl;
+			//cout << "v " << var[pr].name << " " << var[pr] << endl;
+			//cout << "v " << var[pr + 1].id << " " << var[pr + 1].name << " " << var[pr + 1] << endl;
 			if (z[k2] != ' ') break;
 			k1 = k2, k2 = getnex(z, k1);
 		//	cout << "1cget\n";
