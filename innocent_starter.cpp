@@ -757,8 +757,22 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 	return a;
 }
 /*
-(define (f g) (g 2))
-(f (lambda (z) (* z (+ z 1))))
+(define (show obj)
+  (display obj)
+  (newline))
+(define var1 1)
+(show (let ((var1 2)
+               (y (lambda () var1)))
+           (y)))  ;; 1
+(show (let* ((var1 2)
+                (y (lambda () var1)))
+           (y)))  ;; 2
+(show (letrec ((var1 2)
+                  (y (lambda () var1)))
+           (y)))  ;; 2
+(show (let* ((var1 2)
+             (y var1))
+           y))  ;; 2
 */
 num getvalue(string s, int yl, int yr) {
 	//cout << "sss " << s << endl;
@@ -915,7 +929,9 @@ num getvalue(string s, int yl, int yr) {
 		} else if (s1 == "let" || s1 == "let*" || s1 == "letrec") {
 			//(define (f x y) (let ((a (+ x y)) (b (* x y))) (+ a b)))
 			k3 = getnex(s, k2);
+			bool mlet = 0;
 			//cout << "spp " << s << endl;
+			if (s[4] == ' ') mlet = 1;
 			s.erase(k3 - 1, 1);
 			s.erase(s.length() - 1, 1);
 			s.erase(0, k2 - k1 + 2);
@@ -938,11 +954,29 @@ num getvalue(string s, int yl, int yr) {
 			k1 = -1, k2 = getnex(s, k1);
 			num a;
 			int pf = ftot, pl = tot, pr = tot;
+			num rn[5];
+			int ri[5], le = 0;
 			while (1) {
 				s2.assign(s, k1 + 1, k2 - k1 - 1);
+				if (k2 > k3) {
+					for (int i = 0; i < le; i++) {
+						var[ri[i]] = rn[i];
+					}
+				}
 				a = getvalue(s2, yl, yr);
 				if (s[k2] != ' ') break;
 				k1 = k2, k2 = getnex(s, k1);
+				if (mlet && tot > pl) {
+					for (int i = tot - 1; i >= tot - 5 && i >= 1; i--) {
+						if (var[tot].name == var[i].name) {
+							rn[len] = var[tot];
+							ri[len] = i;
+							le++;
+							var[tot] = var[i];
+							break;
+						}
+					}
+				}
 			}
 			tot = pl;
 			ftot = pf;
@@ -1177,7 +1211,7 @@ int main() {
 					}
 					//cout << fname[ftot] << endl << fmat[ftot] << endl << func[ftot] << endl;
 					s.clear();
-					tot = bkv, ftot = bkf;
+					//tot = bkv, ftot = bkf;
 					//cout << ftot << endl;
 					//cout << "once" << endl;
 					continue;
@@ -1193,20 +1227,20 @@ int main() {
 				var[tot].later = s2;
 				//cout << getvalue(s2) << endl;
 				s.clear();
-				tot = bkv, ftot = bkf;
+				//tot = bkv, ftot = bkf;
 				//cout << ftot << endl;
 			} else {
 				//cout << "here\n";
 				cout << getvalue(s) << endl;
 				s.clear();
-				tot = bkv, ftot = bkf;
+				//tot = bkv, ftot = bkf;
 			}
 		} else if (!s.empty()) {
 			cout << getvalue(s) << endl;
 			s.clear();
-			tot = bkv, ftot = bkf;
+			//tot = bkv, ftot = bkf;
 		}
-		tot = bkv, ftot = bkf;
+		//tot = bkv, ftot = bkf;
 		//cout << tot << ftot << endl;
 		//cout << ftot << endl;
 		//cout << tot << endl << ptot << endl << ftot << endl;
@@ -1215,16 +1249,18 @@ int main() {
 	return 0;
 }
 /*
-(define (cube x) (* x x x))
-(define (sum term a next b)
-  (if (> a b)
-      0
-      (+ (term a)
-         (sum term (next a) next b))))
-(define (integral f a b dx)
-  (* (sum f (+ a (/ dx 2.0))
-          (lambda (x) (+ x dx))
-          b)
-     dx))
-(integral cube 0 1 0.01)
+(define var1 1)
+(let ((var1 2) (y (lambda () var1))) (y))
+
+(let* ((var1 2) (y var1)) y)
+
+(define fib
+  (lambda (n)
+    (letrec ((calc-fib (lambda (prev now n)
+                         (if (= n 0)
+                             prev
+                             (calc-fib now (+ prev now) (- n 1))))))
+      (calc-fib 0 1 n))))
+(fib 5)
+(fib 20)
 */
