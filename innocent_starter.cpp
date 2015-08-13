@@ -475,6 +475,8 @@ ostream& operator<<(ostream &os, const num &obj) {
 		os << obj.str;
 	} else if (obj.id == 7) {
 		os << obj.later;
+	} else {
+		os << "";
 	}
 }
 
@@ -766,6 +768,7 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
           b)
      dx))
 (integral cube 0 1 0.01)
+((lambda (x y z) (+ x y (* z z))) 1 2 3)
 */
 num getvalue(string s, int yl, int yr) {
 	//cout << "sss " << s << endl;
@@ -810,9 +813,9 @@ num getvalue(string s, int yl, int yr) {
 		//cout << "v1 " << v1 << endl;
 		return v1;
 	} else {
-		int k1 = 1, k2 = getnex(s, k1), k3;
+		int k1 = 0, k2 = getnex(s, k1), k3;
 		int fr = 0;
-		string s1 (s, k1, k2 - k1), s2;
+		string s1 (s, k1 + 1, k2 - k1 - 1), s2;
 		if (s1 == "if") {
 		//	cout << "here" << endl;
 			k1 = k2, k2 = getnex(s, k1);
@@ -920,8 +923,37 @@ num getvalue(string s, int yl, int yr) {
 		} else if (ispref(s1)) {
 			return calcpref(s, s1, yl, yr);
 		}
-		//cout << "s1 " << s1 << endl;
+	//	cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
+		if (fr == 0) {
+			num la = getvalue(s1);
+			if (la.id == 7) {
+				string x = la.later, y = s1;
+				cout << "y " << y << endl;
+				cout << "x " << x << endl;
+				int l1 = s.length(), l2 = y.length(), p1, p2;
+				for (int j = 0; j < l1; j++) {
+					p1 = j;
+					for (p2 = 0; p1 < l1 && p2 < l2; p1++, p2++) {
+						if (s[p1] != y[p2]) {
+							break;
+						}
+					}
+					if (p2 == l2 && (p1 == l1 || s[p1] == ' ' || s[p1] == ')' || s[p1] == '(') && 
+					(s[j - 1] == '(' || s[j - 1] == ' ' || s[j - 1] == ')')) {
+						s.replace(j, l2, x);
+						j = j - l2 + x.length();
+						l1 = s.length();
+					}
+				}
+				cout << "s " << s << endl;
+				k1 = 1, k2 = getnex(s, k1);
+				fr = findfunc(x);
+				//cout << "znex " << z << endl;
+				//system("pause");
+				//cout << "z " << z << endl;
+			}
+		}
 		/*
 		cout << "here" << endl;
 		k3 = getnex(s, k2);
@@ -1130,6 +1162,7 @@ int main() {
 				tot = bkv, ftot = bkf;
 				//cout << ftot << endl;
 			} else {
+				//cout << "here\n";
 				cout << getvalue(s) << endl;
 				s.clear();
 				tot = bkv, ftot = bkf;
