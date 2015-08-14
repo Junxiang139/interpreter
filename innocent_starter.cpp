@@ -15,13 +15,14 @@ using namespace std;
 const int QVN = 50005;
 const int QFN = 50005;
 struct num {
-	int id;//1 2 3 4 5 6 7 int float high fraction #t#f string func
+	int id;//1 2 3 4 5 6 7 8 int float high fraction #t#f string func cons
 	int intnum;
 	double floatnum;
 	bool zf;
 	int a[105] = {0};
 	int fz, fm;
 	bool tf;
+	int car, cdr;//rank of car&cdr
 	string name;//var name
 	string str;//string type
 	string later;//id = 0 : save what should be get value; id = 7 : funcname
@@ -67,8 +68,10 @@ struct num {
 			tf = c.tf;
 		} else if (id == 6) {
 			str = c.str;
-		} else {
+		} else if (id == 7) {
 			later = c.later;
+		} else if (id == 8) {
+			car = c.car, cdr = c.cdr;
 		}
 		return *this;
 	}
@@ -210,9 +213,11 @@ bool num::operator==(const num &c) const {
 		return 1;
 	} else if (a.id == 7) {
 		return b.id == 7;
-	} else {
+	} else if (a.id == 6 && b.id == 6) {
 		return a.str == b.str;
-	}
+	} else if (a.id == 8 && b.id == 8) {
+		return (a.car == b.car) && (a.cdr == b.cdr);
+	} else return 0;
 }
 bool num::operator<(const num &c) const {
 	num a = *this, b = c;
@@ -475,6 +480,21 @@ ostream& operator<<(ostream &os, const num &obj) {
 		os << obj.str;
 	} else if (obj.id == 7) {
 		os << obj.later;
+	} else if (obj.id == 8) {
+		//only left have bra, if leftpair then have bra, if right not pair then have point
+		if (var[obj.car].id == 8) {
+			os << '(';
+			os << var[obj.car];
+			os << ')';
+		} else {
+			os << var[obj.car];
+		}
+		if (var[obj.cdr].id != 8) {
+			os << " . ";
+		} else {
+			os << " ";
+		}
+		os << var[obj.cdr];
 	} else {
 		os << "";
 	}
@@ -703,7 +723,7 @@ int findfunc(string s) {
 }
 
 string pref[1005];
-int pretot = 10;
+int pretot = 7;
 int ispref(string s) {
 	for (int i = 1; i <= pretot; i++) {
 		if (s == pref[i]) {
@@ -753,6 +773,38 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		c = cintnum(c);
 		a = b;
 		a.intnum = b.intnum % c.intnum;
+	} else if (s1 == "cons") {
+		string s2;
+		num b, c;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2, yl, yr);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		c = getvalue(s2, yl, yr);
+		a.id = 8;
+		a.car = tot + 1;
+		a.cdr = tot + 2;
+		var[tot + 1] = b;
+		var[tot + 2] = c;
+		tot += 2, bkv = tot;
+	} else if (s1 == "car") {
+		string s2;
+		num b;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2, yl, yr);
+		a = var[b.car];
+	} else if (s1 == "cdr") {
+		string s2;
+		num b;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2, yl, yr);
+		a = var[b.cdr];
 	}
 	return a;
 }
@@ -1116,6 +1168,9 @@ int main() {
 	pref[2] = "newline";
 	pref[3] = "quotient";
 	pref[4] = "modulo";
+	pref[5] = "cons";
+	pref[6] = "car";
+	pref[7] = "cdr";
 	stfun.id = 7;
 	string s, s1;
 	s.clear();
@@ -1231,12 +1286,19 @@ int main() {
 				//cout << ftot << endl;
 			} else {
 				//cout << "here\n";
-				cout << getvalue(s) << endl;
+				num ans = getvalue(s);
+				if (ans.id == 8) cout << '(';
+				cout << ans << endl;
+				if (ans.id == 8) cout << ')';
 				s.clear();
 				//tot = bkv, ftot = bkf;
 			}
 		} else if (!s.empty()) {
-			cout << getvalue(s) << endl;
+			num ans = getvalue(s);
+			if (ans.id == 8) cout << '(';
+			cout << ans;
+			if (ans.id == 8) cout << ')';
+			cout << endl;
 			s.clear();
 			//tot = bkv, ftot = bkf;
 		}
