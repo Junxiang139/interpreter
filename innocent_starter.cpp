@@ -15,7 +15,7 @@ using namespace std;
 const int QVN = 50005;
 const int QFN = 50005;
 struct num {
-	int id;//1 2 3 4 5 6 7 8 int float high fraction #t#f string func cons
+	int id;//1 2 3 4 5 6 7 8 9 int float high fraction #t#f string func cons nil
 	int intnum;
 	double floatnum;
 	bool zf;
@@ -72,6 +72,8 @@ struct num {
 			later = c.later;
 		} else if (id == 8) {
 			car = c.car, cdr = c.cdr;
+		} else if (id == 9) {
+			
 		}
 		return *this;
 	}
@@ -89,7 +91,7 @@ struct num {
 	bool operator<(const num &b) const;
 };
 
-num tru, fals, stfun;
+num tru, fals, stfun, emp;
 num var[QVN];
 int tot = 0, bkv = 0;
 
@@ -217,6 +219,8 @@ bool num::operator==(const num &c) const {
 		return a.str == b.str;
 	} else if (a.id == 8 && b.id == 8) {
 		return (a.car == b.car) && (a.cdr == b.cdr);
+	} else if (a.id == 9) {
+		return b.id == 9;
 	} else return 0;
 }
 bool num::operator<(const num &c) const {
@@ -489,9 +493,9 @@ ostream& operator<<(ostream &os, const num &obj) {
 		} else {
 			os << var[obj.car];
 		}
-		if (var[obj.cdr].id != 8) {
+		if (var[obj.cdr].id != 8 && var[obj.cdr].id != 9) {
 			os << " . ";
-		} else {
+		} else if (var[obj.cdr].id != 9) {
 			os << " ";
 		}
 		os << var[obj.cdr];
@@ -723,7 +727,7 @@ int findfunc(string s) {
 }
 
 string pref[1005];
-int pretot = 7;
+int pretot = 9;
 int ispref(string s) {
 	for (int i = 1; i <= pretot; i++) {
 		if (s == pref[i]) {
@@ -733,6 +737,7 @@ int ispref(string s) {
 	return 0;
 }
 num calcpref(string s, string s1, int yl = 0, int yr = 0) {
+	//cout << "s " << s << endl;
 	num a;
 	if (s1 == "display") {
 		string s2;
@@ -787,8 +792,11 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		a.car = tot + 1;
 		a.cdr = tot + 2;
 		var[tot + 1] = b;
+		var[tot + 1].name = "";
 		var[tot + 2] = c;
-		tot += 2, bkv = tot;
+		var[tot + 2].name = "";
+		tot += 2;
+		bkv = tot;
 	} else if (s1 == "car") {
 		string s2;
 		num b;
@@ -805,6 +813,42 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
 		b = getvalue(s2, yl, yr);
 		a = var[b.cdr];
+	} else if (s1 == "list") {
+		string s2;
+		num b;
+		int k1 = 0, k2 = getnex(s, k1), rank = 0;
+		while (s[k2] == ' ') {
+			k1 = k2, k2 = getnex(s, k1);
+			s2.assign(s, k1 + 1, k2 - k1 - 1);
+			b = getvalue(s2, yl, yr);
+			rank++;
+			tot++;
+			var[tot].id = 8;
+			var[tot].name = "";
+			var[tot].car = tot + 1;
+			var[tot].cdr = tot + 2;
+			var[tot + 1] = b;
+			var[tot].name = "";
+			if (rank == 1) {
+				a = var[tot];
+			}
+			if (s[k2] != ' ') {
+				var[tot].cdr = 0;
+			}
+			//cout << "lt " << tot << " " << var[tot].car << " " << var[tot].cdr << endl;
+			tot++;
+			//cout << "la " << a.id << " " << a.car << " " << a.cdr << endl;
+		}
+		bkv = tot;
+	} else if (s1 == "null?") {
+		string s2;
+		num b;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2, yl, yr);
+		a.id = 5;
+		a.tf = (b.id == 9);
 	}
 	return a;
 }
@@ -827,7 +871,7 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
            y))  ;; 2
 */
 num getvalue(string s, int yl, int yr) {
-	//cout << "sss " << s << endl;
+	//cout << "s!!!!!!!!!!!!!! " << s << endl;
 	//system("pause");
 	if (numon(s)) {
 		return numv(s); 
@@ -936,7 +980,7 @@ num getvalue(string s, int yl, int yr) {
 			tot++;
 			num e;
 			var[tot] = e;
-			bkv = tot;
+			//bkv = tot;
 			s2.assign(s, k1 + 1, k2 - k1 - 1);
 			var[tot].name = s2;
 			s2.assign(s, k2 + 1, k3 - k2 - 1);
@@ -1031,10 +1075,14 @@ num getvalue(string s, int yl, int yr) {
 				}
 			}
 			tot = pl;
+			if (tot < bkv) tot = bkv;
 			ftot = pf;
 			return a;
 		} else if (ispref(s1)) {
-			return calcpref(s, s1, yl, yr);
+			num pp;
+			pp = calcpref(s, s1, yl, yr);
+			//cout << "pp " << pp.id << " " << pp.car << " " << pp.cdr << endl;
+			return pp;
 		}
 	//	cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
@@ -1151,9 +1199,8 @@ num getvalue(string s, int yl, int yr) {
 		//	cout << "1cget\n";
 		//	cout << "zk1" << z[k1] << "zk1+1" << z[k1+1] << endl;
 		}
-		if (pr == tot) {
-			tot = pl;
-		}
+		tot = pl;
+		if (tot < bkv) tot = bkv;
 		ftot = pf;
 		//cout << "s " << s << endl;
 		//cout << "a " << a << endl;
@@ -1164,6 +1211,7 @@ num getvalue(string s, int yl, int yr) {
 }
 
 int main() {
+	emp.id = 0;
 	pref[1] = "display";
 	pref[2] = "newline";
 	pref[3] = "quotient";
@@ -1171,6 +1219,8 @@ int main() {
 	pref[5] = "cons";
 	pref[6] = "car";
 	pref[7] = "cdr";
+	pref[8] = "list";
+	pref[9] = "null?";
 	stfun.id = 7;
 	string s, s1;
 	s.clear();
@@ -1181,8 +1231,9 @@ int main() {
 	tru.id = fals.id = 5;
 	tru.tf = 1, fals.tf = 0;
 	//preend
-	int predefine = 4;
+	int predefine = 6;
 	int cpre = 0;
+	var[0].id = 9;
 	while (1) {
 		if (cpre < predefine) {
 			cpre++;
@@ -1191,12 +1242,18 @@ int main() {
 			} else if (cpre == 2) {
 				s = "(define #f 0)";
 			} else if (cpre == 3) {
+				s = "(define '() 0)";
+			} else if (cpre == 4) {
+				s = "(define nil 0)";
+			} else if (cpre == 5) {
 				s = "(define (abs x) (if (> x 0) x (- 0 x)))";
 			} else {
 				var[1].id = 5;
 				var[1].tf = 1;
 				var[2].id = 5;
 				var[2].tf = 0;
+				var[3].id = 9;
+				var[4].id = 9;
 			}	
 		} else {
 			gets(forgets);
@@ -1266,24 +1323,35 @@ int main() {
 					}
 					//cout << fname[ftot] << endl << fmat[ftot] << endl << func[ftot] << endl;
 					s.clear();
-					//tot = bkv, ftot = bkf;
+					tot = bkv, ftot = bkf;
 					//cout << ftot << endl;
 					//cout << "once" << endl;
-					continue;
+				} else {
+					tot++;
+					bkv = tot;
+					num e;
+					var[tot] = e;
+					s2.assign(s, k1 + 1, k2 - k1 - 1);
+					var[tot].name = s2;
+					s2.assign(s, k2 + 1, k3 - k2 - 1);
+					//cout << getvalue(s2) << endl;
+					if (s2.length() > 6) {
+						string s3;
+						s3.assign(s2, 1, 5);
+						if (s3 == "list ") {
+							//cout << "??? tot " << tot << endl;
+							int fv = tot;
+							var[fv] = getvalue(s2);
+							//cout << "wtf " << var[5].car << " " << var[5].cdr << endl;
+						}
+					} else {
+						var[tot].later = s2;
+					}
+					//cout << getvalue(s2) << endl;
+					s.clear();
+					//tot = bkv, ftot = bkf;
+					//cout << ftot << endl;
 				}
-				tot++;
-				bkv = tot;
-				num e;
-				var[tot] = e;
-				s2.assign(s, k1 + 1, k2 - k1 - 1);
-				var[tot].name = s2;
-				s2.assign(s, k2 + 1, k3 - k2 - 1);
-				//cout << getvalue(s2) << endl;
-				var[tot].later = s2;
-				//cout << getvalue(s2) << endl;
-				s.clear();
-				//tot = bkv, ftot = bkf;
-				//cout << ftot << endl;
 			} else {
 				//cout << "here\n";
 				num ans = getvalue(s);
@@ -1302,7 +1370,12 @@ int main() {
 			s.clear();
 			//tot = bkv, ftot = bkf;
 		}
-		//tot = bkv, ftot = bkf;
+		tot = bkv, ftot = bkf;
+		//cout << tot << " " << ftot << endl;
+		//cout << var[5].car << " " << var[5].cdr << endl;
+		//for (int i = 1; i <= tot; i++) {
+		//	cout << i << var[i].name << " " << var[i] << endl;
+		//}
 		//cout << tot << ftot << endl;
 		//cout << ftot << endl;
 		//cout << tot << endl << ptot << endl << ftot << endl;
@@ -1311,18 +1384,6 @@ int main() {
 	return 0;
 }
 /*
-(define var1 1)
-(let ((var1 2) (y (lambda () var1))) (y))
-
-(let* ((var1 2) (y var1)) y)
-
-(define fib
-  (lambda (n)
-    (letrec ((calc-fib (lambda (prev now n)
-                         (if (= n 0)
-                             prev
-                             (calc-fib now (+ prev now) (- n 1))))))
-      (calc-fib 0 1 n))))
-(fib 5)
-(fib 20)
+(define x (cons 1 (cons 2 (cons 3 (cons 4 nil)))))
+(define y (list 1 2 3 4))
 */
