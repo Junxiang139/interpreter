@@ -16,8 +16,9 @@ try to apply plus in integer
 using namespace std;
 const int QVN = 50005;
 const int QFN = 50005;
+//id: 1 2 3 4 5 6 7 8 9 int float high fraction #t#f string func cons nil
 struct num {
-	int id;//1 2 3 4 5 6 7 8 9 int float high fraction #t#f string func cons nil
+	int id;
 	int intnum;
 	double floatnum;
 	bool zf;
@@ -34,6 +35,11 @@ struct num {
 		floatnum = 0;
 		zf = 0;
 		fz = fm = 0;
+		tf = 0;
+		car = cdr = 0;
+		name.clear();
+		str.clear();
+		later.clear();
 		//a.clear();
 	}
 	num (int b) {
@@ -813,12 +819,14 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		b = getvalue(s2, yl, yr);
 		a = var[b.cdr];
 	} else if (s1 == "list") {
+		//cout << "ls " << s << endl;
 		string s2;
 		num b;
 		int k1 = 0, k2 = getnex(s, k1), rank = 0;
 		while (s[k2] == ' ') {
 			k1 = k2, k2 = getnex(s, k1);
 			s2.assign(s, k1 + 1, k2 - k1 - 1);
+			//cout << "ls2 " << s2 << endl;
 			b = getvalue(s2, yl, yr);
 			rank++;
 			tot++;
@@ -827,12 +835,12 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 			var[tot].car = tot + 1;
 			var[tot].cdr = tot + 2;
 			var[tot + 1] = b;
-			var[tot].name = "";
-			if (rank == 1) {
-				a = var[tot];
-			}
+			var[tot + 1].name = "";
 			if (s[k2] != ' ') {
 				var[tot].cdr = 0;
+			}
+			if (rank == 1) {
+				a = var[tot];
 			}
 			//cout << "lt " << tot << " " << var[tot].car << " " << var[tot].cdr << endl;
 			tot++;
@@ -848,31 +856,84 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		b = getvalue(s2, yl, yr);
 		a.id = 5;
 		a.tf = (b.id == 9);
-	} else if (s1 == "eqv?") {
+	} else if (s1 == "equal?") {
 		ostringstream sout1, sout2;
 		string s2;
 		num b, c;
 		int k1 = 0, k2 = getnex(s, k1);
 		k1 = k2, k2 = getnex(s, k1);
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
-		sout1 << getvalue(s2, yl, yr);
+		//cout << "s1 " << s2 << endl;
+		b = getvalue(s2, yl, yr);
+		sout1 << b;
 		k1 = k2, k2 = getnex(s, k1);
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
-		sout2 << getvalue(s2, yl, yr);
+		//cout << "s2 " << s2 << endl << endl;
+		c = getvalue(s2, yl, yr);
+		sout2 << c;
+		//cout << sout1.str() << " " << sout2.str() << endl;
+		a.id = 5;
+		//cout << "debug " << var[0].id << " " << var[0].later << endl;
+		//cout << "debug2 " << b.car << b.cdr << c.car << c.cdr << endl;
+		a.tf = (sout1.str() == sout2.str());
+	} else if (s1 == "eq?" || s1 == "eqv?") {
+		ostringstream sout1, sout2;
+		string s1, s2;
+		num b, c;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s1.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s1, yl, yr);
+		sout1 << b;
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		c = getvalue(s2, yl, yr);
+		sout2 << c;
 		a.id = 5;
 		a.tf = (sout1.str() == sout2.str());
+		if (a.tf == 1) {
+			if (s1[0] == '(' && s2[0] == '(' && b.id == 8) {
+				a.tf = 0;
+			}
+		}
 	}
 	return a;
 }
 /*
+(define (show obj)
+  (display obj)
+  (newline))
+(define (title obj)
+  (newline)
+  (show obj))
+(define (compare-equal?-eqv? x y)
+  (if (eqv? x y)
+      (equal? x y)
+      #t))
+(title "predicate equal?")
+(define (compare-equal?-eqv? x y)
+  (if (eqv? x y)
+      (equal? x y)
+      #t))
 (and
-       (not (eqv? (cons 1 2) (cons 1 2)))
+       (eq? #t #t)
+       (eq? #f #f)
+       (compare-equal?-eqv? 'a 'a)
+       (compare-equal?-eqv? 'a 'b)
+       (compare-equal?-eqv? 'lowercase 'LOwERcaSE)
+       (compare-equal?-eqv? '() '())
+       (compare-equal?-eqv? (cons 1 2) (cons 1 2))
        (let ((lst (cons 1 2)))
-         (eqv? lst lst))
-       (not (eqv? (lambda() 1) (lambda () 2)))
-       (not (eqv? #f 'nil))
+         (compare-equal?-eqv? lst lst))
+       (compare-equal?-eqv? (lambda () 1) (lambda () 2))
+       (compare-equal?-eqv? #f 'nil)
        (let ((p (lambda (x) x)))
-        (eqv? p p))) ;; #t
+         (compare-equal?-eqv? p p))
+       (equal? 'a 'a)
+       (equal? '(a) '(a))
+       (equal? '(a (b) c) '(a (b) c))
+       (equal? "abc" "abc")
+       (equal? 2 2)) ;; #t
 */
 num getvalue(string s, int yl, int yr) {
 	//cout << "s!!!!!!!!!!!!!! " << s << endl;
@@ -914,6 +975,12 @@ num getvalue(string s, int yl, int yr) {
 			s2.assign(s, k2 + 1, k3 - k2 - 1);
 			v2 = getvalue(s2, yl, yr);
 			v1 = calcv(v1, v2, s[1]);
+			if (s[1] == 'a' && v1.tf == 0) {
+				return v1;
+			}
+			if (s[1] == 'o' && v1.tf == 1) {
+				return v1;
+			}
 		}
 		//cout << "s  " << s << endl;
 		//cout << "v1 " << v1 << endl;
@@ -923,6 +990,11 @@ num getvalue(string s, int yl, int yr) {
 		if (s[1] != '(') {
 			s.erase(0, 1);
 			a.id = 6;
+			for (int i = s.length() - 1; i >= 0; i--) {
+				if (s[i] >= 'A' && s[i] <= 'Z') {
+					s[i] = s[i] - 'A' + 'a';
+				}
+			}
 			a.str = s;
 			//cout << "se " << s << endl;
 		} else {
@@ -930,11 +1002,14 @@ num getvalue(string s, int yl, int yr) {
 			s[1] = ' ';
 			s.insert(1, "list");
 			for (int i = s.length() - 1; i >= 0; i--) {
-				if (s[i] == ' ') {
+				if (s[i] >= 'A' && s[i] <= 'Z') {
+					s[i] = s[i] - 'A' + 'a';
+				}
+				if (s[i] == ' ' && s[i + 1] != '\'') {
 					s.insert(i + 1, "\'");
 				}
 			}
-			//cout << s << endl;
+			//cout << "prob " << s << endl;
 			a = getvalue(s, yl, yr);
 		}
 		return a;
