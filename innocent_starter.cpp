@@ -947,14 +947,48 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		k1 = k2, k2 = getnex(s, k1);
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
 		b = getvalue(s2);
+		if (s2[0] != '(') {
+			int st1 = b.car - 1, mx = st1;
+			int st2 = tot, q;
+			while (var[mx].car > mx || var[mx].cdr > mx) {
+				mx = max(var[mx].car, var[mx].cdr);
+			}
+			for (tot = st2 + 1, q = st1; q <= mx; q++, tot++) {
+				var[tot] = var[q];
+			}
+			b = var[st2];
+		}
 		while (1) {
 			k1 = k2, k2 = getnex(s, k1);
 			s2.assign(s, k1 + 1, k2 - k1 - 1);
 			c = getvalue(s2);
-			int p = 0, q = b.cdr;
 			
+			if (s2[0] != '(') {
+				int st1 = c.car - 1, mx = st1;
+				int st2 = tot, q;
+				while (var[mx].car > mx || var[mx].cdr > mx) {
+					mx = max(var[mx].car, var[mx].cdr);
+				}
+				for (tot = st2 + 1, q = st1; q <= mx; q++, tot++) {
+					var[tot] = var[q];
+				}
+				c = var[st2];
+			}
+			tot++, var[tot] = c;
+			int mk = tot;
+			
+			int p = 0, q = b.cdr;
+			while (q != 0) {
+				p = q;
+				q = var[q].cdr;
+			}
+			if (p == 0) b.cdr = mk;
+			else var[p].cdr = mk;
+			
+			if (s[k2] == ')') break;
 		}
 		bkv = tot;
+		a = b;
 	}
 	return a;
 }
