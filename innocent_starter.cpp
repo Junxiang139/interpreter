@@ -497,6 +497,7 @@ ostream& operator<<(ostream &os, const num &obj) {
 		os << obj.later;
 	} else if (obj.id == 8) {
 		//only left have bra, if leftpair then have bra, if right not pair then have point
+		//os << "car " << obj.car << " cdr " << obj.cdr << endl;
 		if (var[obj.car].id == 8) {
 			os << '(';
 			os << var[obj.car];
@@ -732,7 +733,7 @@ int findfunc(string s) {
 }
 
 string pref[1005];
-int pretot = 12;
+int pretot = 15;
 int ispref(string s) {
 	for (int i = 1; i <= pretot; i++) {
 		if (s == pref[i]) {
@@ -823,17 +824,22 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		string s2;
 		num b;
 		int k1 = 0, k2 = getnex(s, k1), rank = 0;
+		int rr = tot + 1;
 		while (s[k2] == ' ') {
 			k1 = k2, k2 = getnex(s, k1);
 			s2.assign(s, k1 + 1, k2 - k1 - 1);
 			//cout << "ls2 " << s2 << endl;
+			int rm = tot;
+			tot += 2;
 			b = getvalue(s2, yl, yr);
+			tot = rm;
 			rank++;
 			tot++;
 			var[tot].id = 8;
 			var[tot].name = "";
 			var[tot].car = tot + 1;
 			var[tot].cdr = tot + 2;
+			rm = tot;
 			var[tot + 1] = b;
 			var[tot + 1].name = "";
 			if (s[k2] != ' ') {
@@ -842,8 +848,17 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 			if (rank == 1) {
 				a = var[tot];
 			}
+			//cout << "smcar " << tot + 1 << " " << var[tot + 1] << endl;
 			//cout << "lt " << tot << " " << var[tot].car << " " << var[tot].cdr << endl;
 			tot++;
+			while (var[tot].id != 0 || (var[tot].id == 0 && var[tot].later != "")) tot++;
+			tot--;
+			if (var[rm].cdr != 0) {
+				var[rm].cdr = tot + 1;
+				if (rank == 1) {
+					a = var[rm];
+				}
+			}
 			//cout << "la " << a.id << " " << a.car << " " << a.cdr << endl;
 		}
 		bkv = tot;
@@ -896,44 +911,76 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 				a.tf = 0;
 			}
 		}
+	} else if (s1 == "pair?") {
+		string s2;
+		num b;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2, yl, yr);
+		a.id = 5;
+		a.tf = ((b.id == 8) && (var[b.car].id != 8 && var[b.cdr].id != 8));
+		if (a.tf == 0 && s2[0] == '\'') {
+			int ct = 0;
+			for (int i = s2.length(); i; i--) {
+				if (s2[i] == ' ') ct++;
+			}
+			if (ct == 1) a.tf = 1;
+		}
+	} else if (s1 == "list?") {
+		string s2;
+		num b;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2, yl, yr);
+		//cout << s << endl;
+		//cout << var[b.car] << " " << var[b.cdr] << " ? " << var[b.cdr].id << endl;
+		a.id = 5;
+		a.tf = (b.id == 9 || ((b.id == 8) && (var[b.car].id != 8 && (var[b.cdr].id == 8 || var[b.cdr].id == 9))));
+		//cout << "a " << a;
+	} else if (s1 == "append") {
+		//cout << "ls " << s << endl;
+		string s2;
+		num b, c;
+		int k1 = 0, k2 = getnex(s, k1), rank = 0;
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		b = getvalue(s2);
+		while (1) {
+			k1 = k2, k2 = getnex(s, k1);
+			s2.assign(s, k1 + 1, k2 - k1 - 1);
+			c = getvalue(s2);
+			int p = 0, q = b.cdr;
+			
+		}
+		bkv = tot;
 	}
 	return a;
 }
 /*
-(define (show obj)
-  (display obj)
-  (newline))
-(define (title obj)
-  (newline)
-  (show obj))
-(define (compare-equal?-eqv? x y)
-  (if (eqv? x y)
-      (equal? x y)
-      #t))
-(title "predicate equal?")
-(define (compare-equal?-eqv? x y)
-  (if (eqv? x y)
-      (equal? x y)
-      #t))
-(and
-       (eq? #t #t)
-       (eq? #f #f)
-       (compare-equal?-eqv? 'a 'a)
-       (compare-equal?-eqv? 'a 'b)
-       (compare-equal?-eqv? 'lowercase 'LOwERcaSE)
-       (compare-equal?-eqv? '() '())
-       (compare-equal?-eqv? (cons 1 2) (cons 1 2))
-       (let ((lst (cons 1 2)))
-         (compare-equal?-eqv? lst lst))
-       (compare-equal?-eqv? (lambda () 1) (lambda () 2))
-       (compare-equal?-eqv? #f 'nil)
-       (let ((p (lambda (x) x)))
-         (compare-equal?-eqv? p p))
-       (equal? 'a 'a)
-       (equal? '(a) '(a))
-       (equal? '(a (b) c) '(a (b) c))
-       (equal? "abc" "abc")
-       (equal? 2 2)) ;; #t
+(and (equal? '(1 2 3 4) (list 1 2 3 4))
+      (equal? (list 1 2 3 4) (cons 1 (cons 2 (cons 3 (cons 4 '())))))
+      (equal? (cons 1 (cons 2 (cons 3 (cons 4 '())))) '(1 2 3 4))
+      (not (pair? '()))
+      (list? '())
+      (pair? (cons 1 2))
+      (not (list? (cons 1 2)))
+      (pair? '(1 2))
+      (list? '(1 2)))
+*/
+/*
+s = "(define (append list1 list2)";
+s += " (if (null? list1)";
+s += " list2";
+s += " (cons (car list1) (append (cdr list1) list2))))";
+(define (hanoi src dest mid n)
+  (if (= n 0)
+      '()
+      (append (hanoi src mid dest (- n 1))
+              (list (list src dest))
+              (hanoi mid dest src (- n 1)))))
+(hanoi 'a 'b 'c 3)  ;; ((a b) (a c) (b c) (a b) (c a) (c b) (a b))
 */
 num getvalue(string s, int yl, int yr) {
 	//cout << "s!!!!!!!!!!!!!! " << s << endl;
@@ -1043,7 +1090,6 @@ num getvalue(string s, int yl, int yr) {
 					num d = getvalue(s1, yl, yr);
 					if (d == tru) {
 						use = 1;
-						//cout << "damn\n";
 					}
 				} else {
 					//cout << "reach else\n";
@@ -1351,6 +1397,9 @@ int main() {
 	pref[10] = "eqv?";
 	pref[11] = "eq?";
 	pref[12] = "equal?";
+	pref[13] = "pair?";
+	pref[14] = "list?";
+	pref[15] = "append";
 	stfun.id = 7;
 	string s, s1;
 	s.clear();
