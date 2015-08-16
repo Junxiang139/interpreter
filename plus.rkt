@@ -54,7 +54,6 @@
                (fib (- n 2))))))
 (fib 5)
 (fib 20)
-(fib 32)
 (define (average a b) (/ (+ a b) 2.0))
 (define (sqrt1 x)
   (define (good-enough? guess)
@@ -106,23 +105,31 @@
 (v 3)
 (display 1)
 (newline)
-(define x (cons 1 2))
-(define y (cons 3 4))
-(define z (cons x y))
-(define a (cons z y))
-(define b (cons 1 y))
-(define c (cons 1 b))
-(define d (cons y 1))
-(define e (cons d 1))
-(define f (cons b 1))
-(define g (cons 1 d))
-
-x
-z
-a
-b
-c
-d
-e
-f
-g
+(define var1 1)
+(let ((var1 2)
+               (y (lambda () var1)))
+           (y))  ;; 1
+(let* ((var1 2)
+                (y (lambda () var1)))
+           (y))  ;; 2
+(letrec ((var1 2)
+                  (y (lambda () var1)))
+           (y))  ;; 2
+(let* ((var1 2)
+             (y var1))
+           y)  ;; 2
+(define us-coins (list 50 25 10 5 1))
+(define uk-coins (list 100 50 20 10 5 2 1 0.5))
+(define (cc amount coin-values)
+  (cond ((= amount 0) 1)
+        ((or (< amount 0) (no-more? coin-values)) 0)
+        (else (+ (cc amount
+                     (except-first-denomination coin-values))
+                 (cc (- amount
+                      (first-denomination coin-values))
+                     coin-values)))))
+(define (no-more? coin-values) (null? coin-values))
+(define (first-denomination coin-values) (car coin-values))
+(define (except-first-denomination coin-values) (cdr coin-values))
+(cc 50 us-coins)
+(cc 20 uk-coins)

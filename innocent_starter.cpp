@@ -2,6 +2,7 @@
 Our story starts here
 try to apply plus in integer
 */
+
 #include<cstdio>
 #include<cstdlib>
 #include<cstring>
@@ -10,7 +11,8 @@ try to apply plus in integer
 #include<iostream>
 #include<vector>
 #include<string>
-#pragma comment(linker, "/STACK:102400000,10240000")  
+#include<sstream>
+#pragma comment(linker, "/STACK:102400000,10240000")
 using namespace std;
 const int QVN = 50005;
 const int QFN = 50005;
@@ -74,6 +76,8 @@ struct num {
 			car = c.car, cdr = c.cdr;
 		} else if (id == 9) {
 			
+		} else if (id == 0) {
+			later = c.later;
 		}
 		return *this;
 	}
@@ -460,6 +464,7 @@ num num::operator/(const num &c) const {
 	}
 	return a;
 }
+num getvalue(string s, int yl = 0, int yr = 0);
 ostream& operator<<(ostream &os, const num &obj) {
 	if (obj.id == 1) {
 		os << obj.intnum;
@@ -499,12 +504,13 @@ ostream& operator<<(ostream &os, const num &obj) {
 			os << " ";
 		}
 		os << var[obj.cdr];
+	} else if (obj.id == 0 && obj.later != "") {
+		cout << getvalue(obj.later);
 	} else {
 		os << "";
 	}
 }
 
-num getvalue(string s, int yl = 0, int yr = 0);
 
 int lbra = 0, rbra = 0;
 void calclr(string s) {
@@ -530,6 +536,9 @@ int getnex(string s, int pos) {
 		}
 		pos++;
 		return pos;
+	}
+	if (s[pos] == '\'') {
+		return getnex(s, pos);
 	}
 	if (s[pos] != '(') {
 		while (s[pos] != ' ' && s[pos] != ')' && pos < len) pos++;
@@ -707,16 +716,6 @@ int findname(string s, int yl = 0, int yr = 0) {//for var
 	return 0;
 	*/
 }
-/*
-int findpname(string s, int pl, int pr) {//for part var
-	for (int i = pl + 1; i <= pr; i++) {
-		if (pvar[i].name == s) {
-			return i;
-		}
-	}
-	return 0;
-}
-*/
 int findfunc(string s) {
 	for (int i = ftot; i >= 1; i--) {
 		if (fname[i] == s) {
@@ -727,7 +726,7 @@ int findfunc(string s) {
 }
 
 string pref[1005];
-int pretot = 9;
+int pretot = 12;
 int ispref(string s) {
 	for (int i = 1; i <= pretot; i++) {
 		if (s == pref[i]) {
@@ -849,26 +848,31 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		b = getvalue(s2, yl, yr);
 		a.id = 5;
 		a.tf = (b.id == 9);
+	} else if (s1 == "eqv?") {
+		ostringstream sout1, sout2;
+		string s2;
+		num b, c;
+		int k1 = 0, k2 = getnex(s, k1);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		sout1 << getvalue(s2, yl, yr);
+		k1 = k2, k2 = getnex(s, k1);
+		s2.assign(s, k1 + 1, k2 - k1 - 1);
+		sout2 << getvalue(s2, yl, yr);
+		a.id = 5;
+		a.tf = (sout1.str() == sout2.str());
 	}
 	return a;
 }
 /*
-(define (show obj)
-  (display obj)
-  (newline))
-(define var1 1)
-(show (let ((var1 2)
-               (y (lambda () var1)))
-           (y)))  ;; 1
-(show (let* ((var1 2)
-                (y (lambda () var1)))
-           (y)))  ;; 2
-(show (letrec ((var1 2)
-                  (y (lambda () var1)))
-           (y)))  ;; 2
-(show (let* ((var1 2)
-             (y var1))
-           y))  ;; 2
+(and
+       (not (eqv? (cons 1 2) (cons 1 2)))
+       (let ((lst (cons 1 2)))
+         (eqv? lst lst))
+       (not (eqv? (lambda() 1) (lambda () 2)))
+       (not (eqv? #f 'nil))
+       (let ((p (lambda (x) x)))
+        (eqv? p p))) ;; #t
 */
 num getvalue(string s, int yl, int yr) {
 	//cout << "s!!!!!!!!!!!!!! " << s << endl;
@@ -914,6 +918,26 @@ num getvalue(string s, int yl, int yr) {
 		//cout << "s  " << s << endl;
 		//cout << "v1 " << v1 << endl;
 		return v1;
+	} else if (s[0] == '\'') {
+		num a;
+		if (s[1] != '(') {
+			s.erase(0, 1);
+			a.id = 6;
+			a.str = s;
+			//cout << "se " << s << endl;
+		} else {
+			s[0] = '(';
+			s[1] = ' ';
+			s.insert(1, "list");
+			for (int i = s.length() - 1; i >= 0; i--) {
+				if (s[i] == ' ') {
+					s.insert(i + 1, "\'");
+				}
+			}
+			//cout << s << endl;
+			a = getvalue(s, yl, yr);
+		}
+		return a;
 	} else {
 		int k1 = 0, k2 = getnex(s, k1), k3;
 		int fr = 0;
@@ -985,6 +1009,8 @@ num getvalue(string s, int yl, int yr) {
 			var[tot].name = s2;
 			s2.assign(s, k2 + 1, k3 - k2 - 1);
 			var[tot].later = s2;
+			//cout << "here tot " << tot << endl;
+			//cout << "v " << var[tot].name << " " << var[tot].later << endl;
 			return a;
 		} else if (s1 == "lambda") {
 			//(lambda (x) (/ 1.0 (* x (+ x 2))))
@@ -1000,9 +1026,11 @@ num getvalue(string s, int yl, int yr) {
 			*/
 			//cout << "f " << fname[ftot] << endl;
 			fname[ftot] = nam;
-			nam += ' ';
+			
 			k1 = 7, k2 = getnex(s, k1), k3 = getnex(s, k2);
+			//cout << "ls " << s << k1 << k2 << endl;
 			fmat[ftot].assign(s, k1 + 1, k2 - k1 - 1);
+			if (k2 - k1 > 3) nam += ' ';
 			fmat[ftot].insert(1, nam);
 			//cout << "s  " << s << endl;
 			//cout << "fm " << fmat[ftot] << endl;
@@ -1048,27 +1076,44 @@ num getvalue(string s, int yl, int yr) {
 			}
 			//cout << "s " << s << endl;
 			k1 = -1, k2 = getnex(s, k1);
+			//cout << k1 << k2 << endl;
 			num a;
 			int pf = ftot, pl = tot, pr = tot;
 			num rn[5];
 			int ri[5], le = 0;
+			//cout << "mlet" << mlet << endl;
+			//cout << k2 << k3 << endl;
+			//cout << s[k3 - 1] << s[k3] << s[k3 + 1] << endl;
 			while (1) {
 				s2.assign(s, k1 + 1, k2 - k1 - 1);
-				if (k2 > k3) {
+				/*
+				if (mlet && k2 > k3) {
 					for (int i = 0; i < le; i++) {
 						var[ri[i]] = rn[i];
 					}
 				}
-				a = getvalue(s2, yl, yr);
+				*/
+				//cout << "s2 " << s2 << endl;
+				a = getvalue(s2, yl, tot);
 				if (s[k2] != ' ') break;
 				k1 = k2, k2 = getnex(s, k1);
-				if (mlet && tot > pl) {
+				if (mlet) {
 					for (int i = tot - 1; i >= tot - 5 && i >= 1; i--) {
 						if (var[tot].name == var[i].name) {
-							rn[len] = var[tot];
-							ri[len] = i;
+							//cout << "CC " << var[tot].later << " " << var[i].later << endl;
+							rn[le] = var[tot];
+							ri[le] = i;
 							le++;
 							var[tot] = var[i];
+							//for (int j = tot; j >= 1; j--) {
+							//	cout << "j " << j << " " << var[j] << " " << var[j].later << endl;
+							//}
+							/*
+							if (var[tot].id == 0) {
+								var[tot] = getvalue(var[tot].later);
+							}
+							cout << var[tot] << endl;
+							*/
 							break;
 						}
 					}
@@ -1084,8 +1129,14 @@ num getvalue(string s, int yl, int yr) {
 			//cout << "pp " << pp.id << " " << pp.car << " " << pp.cdr << endl;
 			return pp;
 		}
-	//	cout << "s1 " << s1 << endl;
+		//cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
+		//cout << "k2 " << k2 << " sk2 " << s[k2] << " yr " << yr << " tot " << tot << endl;
+		if (fr == 0 && s[k2] == ')' && (findname(s1, yl, yr))) {
+			//cout << "fyrhere " << yr << " " << findname(s1, yl, yr) << endl;
+			fr = findfunc(var[findname(s1, yl, yr)].later);
+		}
+		//cout << "fr " << fr << endl;
 		if (fr == 0) {
 			num la = getvalue(s1);
 			if (la.id == 7) {
@@ -1212,6 +1263,7 @@ num getvalue(string s, int yl, int yr) {
 
 int main() {
 	emp.id = 0;
+	//cout << getnex("\'(a b c)))", -1) << endl;
 	pref[1] = "display";
 	pref[2] = "newline";
 	pref[3] = "quotient";
@@ -1221,6 +1273,9 @@ int main() {
 	pref[7] = "cdr";
 	pref[8] = "list";
 	pref[9] = "null?";
+	pref[10] = "eqv?";
+	pref[11] = "eq?";
+	pref[12] = "equal?";
 	stfun.id = 7;
 	string s, s1;
 	s.clear();
@@ -1254,6 +1309,7 @@ int main() {
 				var[2].tf = 0;
 				var[3].id = 9;
 				var[4].id = 9;
+				//cout << var[3].name << endl;
 			}	
 		} else {
 			gets(forgets);
@@ -1332,8 +1388,10 @@ int main() {
 					num e;
 					var[tot] = e;
 					s2.assign(s, k1 + 1, k2 - k1 - 1);
+					//cout << "s21 " << s2 << endl;
 					var[tot].name = s2;
 					s2.assign(s, k2 + 1, k3 - k2 - 1);
+					//cout << "s22 " << s2 << endl;
 					//cout << getvalue(s2) << endl;
 					if (s2.length() > 6) {
 						string s3;
@@ -1342,11 +1400,13 @@ int main() {
 							//cout << "??? tot " << tot << endl;
 							int fv = tot;
 							var[fv] = getvalue(s2);
+							s.clear();
+							continue;
 							//cout << "wtf " << var[5].car << " " << var[5].cdr << endl;
 						}
-					} else {
-						var[tot].later = s2;
 					}
+					var[tot].later = s2;
+					//cout << "vl " << var[tot].later << endl;
 					//cout << getvalue(s2) << endl;
 					s.clear();
 					//tot = bkv, ftot = bkf;
@@ -1356,8 +1416,9 @@ int main() {
 				//cout << "here\n";
 				num ans = getvalue(s);
 				if (ans.id == 8) cout << '(';
-				cout << ans << endl;
+				cout << ans;
 				if (ans.id == 8) cout << ')';
+				cout << endl;
 				s.clear();
 				//tot = bkv, ftot = bkf;
 			}
