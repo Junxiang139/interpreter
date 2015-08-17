@@ -860,7 +860,9 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 			//cout << "smcar " << tot + 1 << " " << var[tot + 1] << endl;
 			//cout << "lt " << tot << " " << var[tot].car << " " << var[tot].cdr << endl;
 			tot++;
-			while (var[tot].id != 0 || (var[tot].id == 0 && var[tot].later != "")) tot++;
+			while ( var[tot].id != 0 || (var[tot].id == 0 && var[tot].later != "") ||
+					var[tot + 1].id != 0 || (var[tot + 1].id == 0 && var[tot + 1].later != "") ||
+					var[tot + 2].id != 0 || (var[tot + 2].id == 0 && var[tot + 2].later != "")) tot++;
 			tot--;
 			if (var[rm].cdr != 0) {
 				var[rm].cdr = tot + 1;
@@ -966,6 +968,7 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 			int st2 = tot, q;
 			while (var[mx].car > mx || var[mx].cdr > mx) {
 				mx = max(var[mx].car, var[mx].cdr);
+				//cout << "yes!" << endl;
 			}
 			tot = max(tot, mx);
 			/*
@@ -981,13 +984,15 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 				b = var[st2 + 1];
 			}
 		//}*/
-		b.id = 8;
+		//b.id = 8;
 		//cout << "s " << s << " b "<< b << endl;
 		//system("pause");
 		while (1) {
+			//cout << "here" << endl;
 			k1 = k2, k2 = getnex(s, k1);
 			s2.assign(s, k1 + 1, k2 - k1 - 1);
 			c = getvalue(s2, yl, yr);
+			
 			if (c.id == 9) {
 				if (s[k2] == ')') break;
 				continue;
@@ -1019,8 +1024,12 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 			
 			int p = 0;
 			q = b.cdr;
+			//cout << "#b " << b << endl;
+			//cout << "bid " << b.id << endl;
+			//cout << "#c " << c << endl;
 			while (q != 0) {
 				p = q;
+				//cout << tot << " " << q << endl;
 				q = var[q].cdr;
 			}
 			if (p == 0) {
@@ -1030,8 +1039,10 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 					b.cdr = mk;
 				}
 			} else {
-				var[p].cdr = mk;var[p].id = 8;
+				var[p].cdr = mk;
+				var[p].id = 8;
 			}
+			//cout << "#ba " << b << endl;
 			if (s[k2] == ')') break;
 		}
 		//bkv = tot;
@@ -1042,7 +1053,7 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		s.insert(s.length(), ")");
 		s.erase(1, 5);
 		s.insert(1, "(lambda ()");
-		return getvalue(s, yl, yr);
+		a = getvalue(s, yl, yr);
 	} else if (s1 == "capacity") {
 		string s2;
 		num b;
@@ -1051,7 +1062,6 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
 		b = getvalue(s2, yl, yr);
 		a = capa(b);
-		return a;
 	}
 	return a;
 }
@@ -1065,9 +1075,9 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 (hanoi 'a 'b 'c 3)  ;; ((a b) (a c) (b c) (a b) (c a) (c b) (a b))
 */
 num getvalue(string s, int yl, int yr) {
-	cout << "s!!!!!!!!!!!!!! " << s << " tot " << tot << " vtot " << var[tot].name << " " << var[tot];
+	//cout << "s!!!!!!!!!!!!!! " << s << " tot " << tot << " vtot " << var[tot].name << " " << var[tot];
 	//system("pause");
-	
+	//cout << "in" << endl;
 	if (numon(s)) {
 		return numv(s); 
 	} else if (findfunc(s)) {
@@ -1111,6 +1121,7 @@ num getvalue(string s, int yl, int yr) {
 			if (s[1] == 'o' && v1.tf == 1) {
 				return v1;
 			}
+			//cout << "here" << endl;
 		}
 		//cout << "s  " << s << endl;
 		//cout << "v1 " << v1 << endl;
@@ -1202,6 +1213,7 @@ num getvalue(string s, int yl, int yr) {
 					k2 = k3, k3 = getnex(s, k3);
 					s3.assign(s, k2 + 1, k3 - k2 - 1), s3 = ' ' + s3;
 					func[ftot] += s3;
+					//cout << "here" << endl;
 				}
 				return a;
 			}
@@ -1244,6 +1256,7 @@ num getvalue(string s, int yl, int yr) {
 				k2 = k3, k3 = getnex(s, k3);
 				s3.assign(s, k2 + 1, k3 - k2 - 1), s3 = ' ' + s3;
 				func[ftot] += s3;
+				//cout << "here" << endl;
 			}
 			//cout << "fu " << func[ftot] << endl;
 			num f;
@@ -1350,6 +1363,7 @@ num getvalue(string s, int yl, int yr) {
 				int l1 = s.length(), l2 = y.length(), p1, p2;
 				for (int j = 0; j < l1; j++) {
 					p1 = j;
+					//cout << "??" << endl;
 					for (p2 = 0; p1 < l1 && p2 < l2; p1++, p2++) {
 						if (s[p1] != y[p2]) {
 							break;
@@ -1424,6 +1438,7 @@ num getvalue(string s, int yl, int yr) {
 							if (z[p1] != y[p2]) {
 								break;
 							}
+							//printf("%d\n", 1);
 						}
 						if (p2 == l2 && (p1 == l1 || z[p1] == ' ') && 
 						(z[j - 1] == '(' || z[j - 1] == ' ')) {
@@ -1440,7 +1455,10 @@ num getvalue(string s, int yl, int yr) {
 		//		cout << "pvar " << pvar[i] << endl;
 			}
 		}
+		//cout << 2101 << endl;
+		/*
 		if (s[1] == 'h') {
+			//cout << "reday\n" << endl;
 			for (int i = tot; i >= 1; i--) {
 				if (var[i].name == "src") {
 					cout << var[i] << " ";
@@ -1466,10 +1484,13 @@ num getvalue(string s, int yl, int yr) {
 				}
 			}
 		}
+		*/
 		//cout << "func " << z << endl;
 		k1 = -1, k2 = getnex(z, k1);
+		//cout << "2102" << endl;
 		num a;
 		while (1) {
+			//cout << "here " << endl;
 			s2.assign(z, k1 + 1, k2 - k1 - 1);
 			//cout << "s2 " << s2 << endl;
 			//if (pr > pl) a = getvalue(s2, pl, pr);
@@ -1483,23 +1504,29 @@ num getvalue(string s, int yl, int yr) {
 		//	cout << "1cget\n";
 		//	cout << "zk1" << z[k1] << "zk1+1" << z[k1+1] << endl;
 		}
+		//cout << "2" << endl;
 		//if (!s.find("(list ") && !s.find("(append ")) {
 		int back = 1, rrr = tot;
 		for (; tot > pl && tot > bkv; tot--) {
-			if (var[tot].id != 8) {
+			if (var[tot].id != 8 && var[tot].name != "") {
 				var[tot].id = 0;
 				var[tot].name = "";
 				var[tot].later = "";
 			} else {
 				back = 0;
 			}
+			//cout << "not" << endl;
 		}
-		if (back) tot = rrr;
+		//cout << "3" << endl;
+		//cout << "s " << s << endl;
+		//system("pause");
+		if (back == 0) tot = rrr;
 		//}
 		if (tot < bkv) tot = bkv;
 		ftot = pf;
 		//cout << "s " << s << endl;
 		//cout << "a " << a << endl;
+		//cout << "out" << endl;
 		return a;
 		//cout << sf << endl;
 	}
@@ -1603,11 +1630,14 @@ int main() {
 					} else if (dd && (*ti) == ' ' && (*it) == ')') {
 						s.erase(ti);
 						it--, it--;
+					} else if (dd && (*it) == '	') {
+						s.erase(it);
+						it--;
 					}
 				}
 			}
 		}
-		//cout << s << endl;
+		cout << s << endl;
 		//define
 		bkv = tot, bkf = ftot;
 		if (s.length() >= 8) {
@@ -1696,7 +1726,6 @@ int main() {
 	return 0;
 }
 /*
-(append (append (list (list 'a 'b)) (list (list 'b 'c)) (list (list 'c 'd))) (list (list 'd 'e)) (append (list (list 'a 'b)) (list (list 'b 'c)) (list (list 'c 'd))))
 (define x (cons 1 (cons 2 (cons 3 (cons 4 nil)))))
 (define y (list 1 2 3 4))
 */
