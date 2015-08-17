@@ -1075,9 +1075,10 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 (hanoi 'a 'b 'c 3)  ;; ((a b) (a c) (b c) (a b) (c a) (c b) (a b))
 */
 num getvalue(string s, int yl, int yr) {
-	//cout << "s!!!!!!!!!!!!!! " << s << " tot " << tot << " vtot " << var[tot].name << " " << var[tot];
+	//cout << "s!!!!!!!!!!!!!! " << s << " tot " << tot << endl;
 	//system("pause");
 	//cout << "in" << endl;
+	//cout << "s " << s << endl;
 	if (numon(s)) {
 		return numv(s); 
 	} else if (findfunc(s)) {
@@ -1123,6 +1124,10 @@ num getvalue(string s, int yl, int yr) {
 			}
 			//cout << "here" << endl;
 		}
+		/*
+		if (s[1] == '-') {
+			cout << "v1 " << v1 << endl;
+		}*/
 		//cout << "s  " << s << endl;
 		//cout << "v1 " << v1 << endl;
 		return v1;
@@ -1421,7 +1426,17 @@ num getvalue(string s, int yl, int yr) {
 				k1 = k2, k2 = getnex(s, k1);
 				s1.assign(s, k1 + 1, k2 - k1 - 1);
 				//cout << "yr " << yr << " bkv " << bkv << endl;
+				/*
+				if (var[i].name == "coin-values") {
+					cout << "s1c " << s1 << " " << pr << " " << tot << endl;
+				}
+				*/
 				var[i] = getvalue(s1, yl, yr);
+				/*
+				if (var[i].name == "coin-values") {
+					cout << "s1c2 " << var[i] << endl;
+				}
+				*/
 				//cout << s << endl;
 				//cout << "here " << var[i].name << ' ' << var[i] << ' ' << s1 << endl;
 				//system("pause");
@@ -1457,14 +1472,25 @@ num getvalue(string s, int yl, int yr) {
 		}
 		//cout << 2101 << endl;
 		/*
-		if (s[1] == 'h') {
+		if (s[1] == 'c') {
 			//cout << "reday\n" << endl;
-			for (int i = tot; i >= 1; i--) {
-				if (var[i].name == "src") {
-					cout << var[i] << " ";
-					break;
+			cout << "pr tot " << pr << " " << tot << endl;
+			cout << "coins-values" << endl;
+			for (int i = pr; i >= 1; i--) {
+				if (var[i].name == "coin-values") {
+					cout << "i " << i << " " << var[i] << endl;
 				}
 			}
+			cout << "end" << endl;
+			cout << "amount" << endl;
+			for (int i = pr; i >= 1; i--) {
+				if (var[i].name == "amount") {
+					cout << "i " << i << " " << var[i] << endl;
+				}
+			}
+			cout << "end" << endl;
+			system("pause");
+			/*
 			for (int i = tot; i >= 1; i--) {
 				if (var[i].name == "dest") {
 					cout << var[i] << " ";
@@ -1483,6 +1509,7 @@ num getvalue(string s, int yl, int yr) {
 					break;
 				}
 			}
+			
 		}
 		*/
 		//cout << "func " << z << endl;
@@ -1494,7 +1521,7 @@ num getvalue(string s, int yl, int yr) {
 			s2.assign(z, k1 + 1, k2 - k1 - 1);
 			//cout << "s2 " << s2 << endl;
 			//if (pr > pl) a = getvalue(s2, pl, pr);
-			a = getvalue(s2, yl, tot);
+			a = getvalue(s2, pl, tot);
 			//cout << "a " << a << endl;
 			//cout << "pr " << pr << endl;
 			//cout << "v " << var[pr].name << " " << var[pr] << endl;
@@ -1506,24 +1533,34 @@ num getvalue(string s, int yl, int yr) {
 		}
 		//cout << "2" << endl;
 		//if (!s.find("(list ") && !s.find("(append ")) {
-		int back = 1, rrr = tot;
-		for (; tot > pl && tot > bkv; tot--) {
-			if (var[tot].id != 8 && var[tot].name != "") {
-				var[tot].id = 0;
-				var[tot].name = "";
-				var[tot].later = "";
-			} else {
-				back = 0;
+		//tot = max(bkv, pl);
+		if (var[tot].id == 8 && var[tot].name != "") {
+			tot = max(bkv, pl);
+		} else {
+			int back = 1, rrr = tot;
+			for (; tot > pl && tot > bkv; tot--) {
+				if (var[tot].id != 8 && var[tot].name != "") {
+					var[tot].id = 0;
+					var[tot].name = "";
+					var[tot].later = "";
+				} else {
+					back = 0;
+				}
+				//cout << "not" << endl;
 			}
-			//cout << "not" << endl;
+			//cout << "3" << endl;
+			//cout << "s " << s << endl;
+			//system("pause");
+			if (back == 0) tot = rrr;
+			//}
+			if (tot < bkv) tot = bkv;
+			/*
+			if (s[1] == 'e') {
+				cout << "ex a " << a << endl;
+			}
+			*/
 		}
-		//cout << "3" << endl;
-		//cout << "s " << s << endl;
-		//system("pause");
-		if (back == 0) tot = rrr;
-		//}
-		if (tot < bkv) tot = bkv;
-		ftot = pf;
+		
 		//cout << "s " << s << endl;
 		//cout << "a " << a << endl;
 		//cout << "out" << endl;
@@ -1637,7 +1674,7 @@ int main() {
 				}
 			}
 		}
-		cout << s << endl;
+		//cout << s << endl;
 		//define
 		bkv = tot, bkf = ftot;
 		if (s.length() >= 8) {
@@ -1676,6 +1713,7 @@ int main() {
 					if (s2.length() > 6) {
 						string s3;
 						s3.assign(s2, 1, 5);
+						///*
 						if (s3 == "list ") {
 							//cout << "??? tot " << tot << endl;
 							int fv = tot;
@@ -1684,12 +1722,13 @@ int main() {
 							continue;
 							//cout << "wtf " << var[5].car << " " << var[5].cdr << endl;
 						}
+						//*/
 					}
 					var[tot].later = s2;
 					//cout << "vl " << var[tot].later << endl;
 					//cout << getvalue(s2) << endl;
 					s.clear();
-					//tot = bkv, ftot = bkf;
+					tot = bkv, ftot = bkf;
 					//cout << ftot << endl;
 				}
 			} else {
@@ -1701,7 +1740,8 @@ int main() {
 				if (ans.id == 8) cout << ')';
 				cout << endl;
 				s.clear();
-				//tot = bkv, ftot = bkf;
+				//tot = bkv;
+				//, ftot = bkf;
 			}
 		} else if (!s.empty()) {
 			num ans = getvalue(s);
