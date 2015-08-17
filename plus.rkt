@@ -56,6 +56,7 @@
                (fib (- n 2))))))
 (fib 5)
 (fib 20)
+(fib 32)
 
 (define (average a b) (/ (+ a b) 2.0))
 (define (sqrt1 x)
@@ -227,3 +228,25 @@
               (hanoi mid dest src (- n 1)))
 	  '()))
 (hanoi 'a 'b 'c 3)  ;; ((a b) (a c) (b c) (a b) (c a) (c b) (a b))
+
+(define (show obj)
+  (display obj)
+  (newline))
+
+(define (title obj)
+  (newline)
+  (show obj))
+
+(title "fibonacci sequence")
+(define fib
+  (lambda (n)
+    (letrec ((calc-fib (lambda (prev now n)
+                         (if (= n 0)
+                             prev
+                             (calc-fib now (+ prev now) (- n 1))))))
+      (calc-fib 0 1 n))))
+
+(show (fib 5))  ;; 5
+(show (fib 20)) ;; 6765
+(show (fib 32))  ;; 2178309, test how good your memory management is
+;; (define unused_var (fib 50000)) ;; test this if you have implemented tail call optimization

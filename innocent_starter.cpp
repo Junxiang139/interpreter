@@ -1752,7 +1752,7 @@ int main() {
 			s.clear();
 			//tot = bkv, ftot = bkf;
 		}
-		tot = bkv, ftot = bkf;
+		//tot = bkv, ftot = bkf;
 		//cout << tot << " " << ftot << endl;
 		//cout << var[5].car << " " << var[5].cdr << endl;
 		//for (int i = 1; i <= tot; i++) {
