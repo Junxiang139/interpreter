@@ -762,7 +762,9 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 		s2.assign(s, k1 + 1, k2 - k1 - 1);
 	//	cout << "cp s2 " << s2 << endl << "yl yr " << yl << yr << endl;
 		b = getvalue(s2, yl, yr);
+		if (b.id == 8) cout << '(';
 		cout << b;
+		if (b.id == 8) cout << ')';
 	} else if (s1 == "newline") {
 		cout << endl;
 	} else if (s1 == "quotient") {
@@ -1600,7 +1602,7 @@ int main() {
 	tru.id = fals.id = 5;
 	tru.tf = 1, fals.tf = 0;
 	//preend
-	int predefine = 6;
+	int predefine = 7;
 	int cpre = 0;
 	var[0].id = 9;
 	while (1) {
@@ -1616,6 +1618,13 @@ int main() {
 				s = "(define nil 0)";
 			} else if (cpre == 5) {
 				s = "(define (abs x) (if (> x 0) x (- 0 x)))";
+			} else if (cpre == 6) {
+				s =  "(define (map proc items)";
+				s += " (if (null? items)";
+				s += " '()";
+				s += " (cons (proc (car items))";
+				s += " (map proc (cdr items)))))";
+				//cout << s << endl;
 			} else {
 				var[1].id = 5;
 				var[1].tf = 1;

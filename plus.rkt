@@ -248,5 +248,5 @@
 
 (show (fib 5))  ;; 5
 (show (fib 20)) ;; 6765
-(show (fib 32))  ;; 2178309, test how good your memory management is
+;; 2178309, test how good your memory management is
 ;; (define unused_var (fib 50000)) ;; test this if you have implemented tail call optimization
