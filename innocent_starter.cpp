@@ -1602,7 +1602,7 @@ int main() {
 	tru.id = fals.id = 5;
 	tru.tf = 1, fals.tf = 0;
 	//preend
-	int predefine = 7;
+	int predefine = 13;
 	int cpre = 0;
 	var[0].id = 9;
 	while (1) {
@@ -1625,6 +1625,26 @@ int main() {
 				s += " (cons (proc (car items))";
 				s += " (map proc (cdr items)))))";
 				//cout << s << endl;
+			} else if (cpre == 7) {
+				s =  "(define (map2 proc item1 item2)";
+				s += " (if (null? item1)";
+				s += " '()";
+				s += " (cons (proc (car item1) (car item2))";
+				s += " (map2 proc (cdr item1) (cdr item2)))))";
+				//cout << s << endl;
+			} else if (cpre == 8) {
+				s =  "(define (q x y) (+ x y))";
+			} else if (cpre == 9) {
+				s =  "(define (w x y) (- x y))";
+			} else if (cpre == 10) {
+				s =  "(define (e x y) (* x y))";
+			} else if (cpre == 11) {
+				s =  "(define (r x y) (/ x y))";
+			} else if (cpre == 12) {
+				s = "(define (apply proc items)";
+				s += " (if (null? (cdr items))";
+				s += " (car items)";
+				s += " (proc (car items) (apply proc (cdr items)))))";
 			} else {
 				var[1].id = 5;
 				var[1].tf = 1;
@@ -1632,6 +1652,11 @@ int main() {
 				var[2].tf = 0;
 				var[3].id = 9;
 				var[4].id = 9;
+				fname[4]   = "+", fname[5]   = "-", fname[6]   = "*", fname[7]   = "/";
+				fmat[5][1] = '+', fmat[5][1] = '-', fmat[6][1] = '*', fmat[7][1] = '/';
+				//for (int i = 4; i <= 7; i++) {
+				//	cout << fname[i] << " " << fmat[i] << " " << func[i] << " " << endl;
+				//}
 				//cout << var[3].name << endl;
 			}	
 		} else {
@@ -1683,6 +1708,7 @@ int main() {
 				}
 			}
 		}
+		
 		//cout << s << endl;
 		//define
 		bkv = tot, bkf = ftot;
