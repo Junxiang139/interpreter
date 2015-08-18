@@ -195,6 +195,7 @@ num cfranum(const num &b) {
 	return a;
 }
 string cstr(int v) {
+	v += 270;
 	string s;
 	s += 'f';
 	while (v) {
@@ -752,6 +753,7 @@ int capa(num a) {
 	return ans;
 }
 num calcpref(string s, string s1, int yl = 0, int yr = 0) {
+	//cout << "prefs " << s << " tot " << tot << " ftot " << ftot << endl;
 	//cout << "s " << s << endl;
 	num a;
 	if (s1 == "display") {
@@ -1077,7 +1079,10 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
 (hanoi 'a 'b 'c 3)  ;; ((a b) (a c) (b c) (a b) (c a) (c b) (a b))
 */
 num getvalue(string s, int yl, int yr) {
-	//cout << "s!!!!!!!!!!!!!! " << s << " tot " << tot << endl;
+	if (s == "(choose-col (+ n 1))") {
+		cout << "@#%$#TGJGROWFWQKJL@TO#@TK$Q@O$T$TO#OT$K#WKERGELK" << endl;
+		cout << "s!!!!!!!!!!!!!! " << s << " tot " << tot << endl;
+	}
 	//system("pause");
 	//cout << "in" << endl;
 	//cout << "s " << s << endl;
@@ -1173,10 +1178,12 @@ num getvalue(string s, int yl, int yr) {
 			k1 = k2, k2 = getnex(s, k1);
 			if (d == fals) {
 				k1 = k2, k2 = getnex(s, k1);
-		//		cout << "go" << endl;
-		//		system("pause");
+				//cout << "go" << endl;
+				//system("pause");
 			}
 			s1.assign(s, k1 + 1, k2 - k1 - 1);
+			cout << s << endl;
+			system("pause");
 		//	cout << "s1-2 " << s1 << endl;
 			return getvalue(s1, yl, yr);
 		} else if (s1 == "cond") {
@@ -1352,6 +1359,15 @@ num getvalue(string s, int yl, int yr) {
 			pp = calcpref(s, s1, yl, yr);
 			//cout << "pp " << pp.id << " " << pp.car << " " << pp.cdr << endl;
 			return pp;
+		} else if (s1 == "map") {
+			k3 = getnex(s, k2);
+			k3 = getnex(s, k3);
+			if (s[k3] == ' ') {
+				s1 = "map2";
+				k2++;
+				s.insert(4, "2");
+				
+			}
 		}
 		//cout << "s1 " << s1 << endl;
 		fr = findfunc(s1);
@@ -1434,6 +1450,15 @@ num getvalue(string s, int yl, int yr) {
 				}
 				*/
 				var[i] = getvalue(s1, yl, yr);
+				
+				if (var[i].name == "jupiter") {
+					cout << "------- begin -------" << endl;
+					cout << "var[i] " << var[i] << endl;
+					cout << "cdr jupiter " << getvalue("(cdr jupiter)", yl, tot) << endl;
+					cout << "s " << s << endl;
+					cout << "-------  end  -------" << endl;
+				}
+				
 				/*
 				if (var[i].name == "coin-values") {
 					cout << "s1c2 " << var[i] << endl;
@@ -1537,7 +1562,13 @@ num getvalue(string s, int yl, int yr) {
 		//if (!s.find("(list ") && !s.find("(append ")) {
 		//tot = max(bkv, pl);
 		if (var[tot].id == 8 && var[tot].name != "") {
-			tot = max(bkv, pl);
+			//tot = max(bkv, pl);
+			//cout << "clear " << s << endl;
+			for (; tot > pl && tot > bkv; tot--) {
+				var[tot].id = 0;
+				var[tot].name = "";
+				var[tot].later = "";
+			}
 		} else {
 			int back = 1, rrr = tot;
 			for (; tot > pl && tot > bkv; tot--) {
@@ -1566,6 +1597,27 @@ num getvalue(string s, int yl, int yr) {
 		//cout << "s " << s << endl;
 		//cout << "a " << a << endl;
 		//cout << "out" << endl;
+		if (s == "(choose-col (+ n 1))") {
+			cout << "ans2 " << a << endl;
+		}
+		if (s == "(choose-col 1)") {
+			cout << "ans1 " << a << endl;
+		}
+		if (s[1] == 'f' && s[2] == 'i') {
+			cout << "------- begin -------" << endl;
+			cout << "s " << s << endl << "ans3 " << a << endl;
+			cout << "func " << z << endl;
+			for (int i = pl + 1; i <= pr; i++) {
+				cout << "var" << i << " "  << var[i] << endl;
+			}
+			cout << "-------  end  -------" << endl;
+		} else if (s[1] == 'f' && s[2] == 'l') {
+			cout << "s " << s << endl << "ans4 " << a << endl;
+		} else if (s[1] == 'v' && s[2] == 'a') {
+			cout << "s " << s << endl << "ans5 " << a << endl;
+		} else if (s[1] == 'f') {
+			cout << "s " << s << endl << "anso " << a << endl;
+		}
 		return a;
 		//cout << sf << endl;
 	}
@@ -1602,7 +1654,7 @@ int main() {
 	tru.id = fals.id = 5;
 	tru.tf = 1, fals.tf = 0;
 	//preend
-	int predefine = 13;
+	int predefine = 14;
 	int cpre = 0;
 	var[0].id = 9;
 	while (1) {
@@ -1617,34 +1669,41 @@ int main() {
 			} else if (cpre == 4) {
 				s = "(define nil 0)";
 			} else if (cpre == 5) {
-				s = "(define (abs x) (if (> x 0) x (- 0 x)))";
+				s = "(define (abs x0x) (if (> x0x 0) x0x (- 0 x0x)))";
 			} else if (cpre == 6) {
-				s =  "(define (map proc items)";
-				s += " (if (null? items)";
+				s =  "(define (map sun mercury)";
+				s += " (if (null? mercury)";
 				s += " '()";
-				s += " (cons (proc (car items))";
-				s += " (map proc (cdr items)))))";
+				s += " (cons (sun (car mercury))";
+				s += " (map sun (cdr mercury)))))";
 				//cout << s << endl;
 			} else if (cpre == 7) {
-				s =  "(define (map2 proc item1 item2)";
-				s += " (if (null? item1)";
+				s =  "(define (map2 mon venus mars)";
+				s += " (if (null? venus)";
 				s += " '()";
-				s += " (cons (proc (car item1) (car item2))";
-				s += " (map2 proc (cdr item1) (cdr item2)))))";
+				s += " (cons (mon (car venus) (car mars))";
+				s += " (map2 mon (cdr venus) (cdr mars)))))";
 				//cout << s << endl;
 			} else if (cpre == 8) {
-				s =  "(define (q x y) (+ x y))";
+				s =  "(define (q x1x y1y) (+ x1x y1y))";
 			} else if (cpre == 9) {
-				s =  "(define (w x y) (- x y))";
+				s =  "(define (w x2x y2y) (- x2x y2y))";
 			} else if (cpre == 10) {
-				s =  "(define (e x y) (* x y))";
+				s =  "(define (e x3x y3y) (* x2x y2y))";
 			} else if (cpre == 11) {
-				s =  "(define (r x y) (/ x y))";
+				s =  "(define (r x4x y4y) (/ x4x y4y))";
 			} else if (cpre == 12) {
-				s = "(define (apply proc items)";
-				s += " (if (null? (cdr items))";
-				s += " (car items)";
-				s += " (proc (car items) (apply proc (cdr items)))))";
+				s = "(define (apply tue jupiter)";
+				s += " (if (null? (cdr jupiter))";
+				s += " (car jupiter)";
+				s += " (tue (car jupiter) (apply tue (cdr jupiter)))))";
+				//cout << ftot << endl;
+			} else if (cpre == 13) {
+				s = "(define (length saturn)";
+				s += " (if (null? saturn)";
+				s += " 0";
+				s += " (+ 1 (length (cdr saturn)))))";
+				//cout << s << endl;
 			} else {
 				var[1].id = 5;
 				var[1].tf = 1;
@@ -1655,7 +1714,10 @@ int main() {
 				fname[4]   = "+", fname[5]   = "-", fname[6]   = "*", fname[7]   = "/";
 				fmat[5][1] = '+', fmat[5][1] = '-', fmat[6][1] = '*', fmat[7][1] = '/';
 				//for (int i = 4; i <= 7; i++) {
-				//	cout << fname[i] << " " << fmat[i] << " " << func[i] << " " << endl;
+				//cout << fname[8] << endl << fmat[8] << endl << func[8] << endl;
+				for (int i = 1; i <= 17; i++) {
+					ftot++, fname[ftot] = pref[i];
+				}
 				//}
 				//cout << var[3].name << endl;
 			}	
@@ -1786,6 +1848,11 @@ int main() {
 			cout << endl;
 			s.clear();
 			//tot = bkv, ftot = bkf;
+		}
+		if (ftot >= 38) {
+		cout << "f803 name " << fname[38] << endl;
+		cout << "f803 fmat " << fmat[38] << endl;
+		cout << "f803 func " << func[38] << endl;
 		}
 		//tot = bkv, ftot = bkf;
 		//cout << tot << " " << ftot << endl;

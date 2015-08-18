@@ -56,7 +56,6 @@
                (fib (- n 2))))))
 (fib 5)
 (fib 20)
-(fib 32)
 
 (define (average a b) (/ (+ a b) 2.0))
 (define (sqrt1 x)
@@ -246,7 +245,13 @@
                              (calc-fib now (+ prev now) (- n 1))))))
       (calc-fib 0 1 n))))
 
+(define (apply1 proc items)
+  (if (null? (cdr items))
+      (car items)
+      (proc (car items) (apply1 proc (cdr items)))))
 (show (fib 5))  ;; 5
 (show (fib 20)) ;; 6765
-;; 2178309, test how good your memory management is
-;; (define unused_var (fib 50000)) ;; test this if you have implemented tail call optimization
+(define y1 (list 1 2 3 4))
+(map (lambda (x) (* x x)) y1)
+(apply + y1)
+(length y1)
