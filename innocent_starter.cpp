@@ -1078,11 +1078,10 @@ num calcpref(string s, string s1, int yl = 0, int yr = 0) {
               (hanoi mid dest src (- n 1)))))
 (hanoi 'a 'b 'c 3)  ;; ((a b) (a c) (b c) (a b) (c a) (c b) (a b))
 */
+int pt = 0;
 num getvalue(string s, int yl, int yr) {
-	if (s == "(choose-col (+ n 1))") {
-		cout << "@#%$#TGJGROWFWQKJL@TO#@TK$Q@O$T$TO#OT$K#WKERGELK" << endl;
-		cout << "s!!!!!!!!!!!!!! " << s << " tot " << tot << endl;
-	}
+	//cout << "s!!!!!!!!!!!!!! " << s << " tot " << tot << " pt " << ++pt << endl;
+	int tr = pt;
 	//system("pause");
 	//cout << "in" << endl;
 	//cout << "s " << s << endl;
@@ -1182,8 +1181,8 @@ num getvalue(string s, int yl, int yr) {
 				//system("pause");
 			}
 			s1.assign(s, k1 + 1, k2 - k1 - 1);
-			cout << s << endl;
-			system("pause");
+			//cout << s << endl;
+			//system("pause");
 		//	cout << "s1-2 " << s1 << endl;
 			return getvalue(s1, yl, yr);
 		} else if (s1 == "cond") {
@@ -1450,15 +1449,15 @@ num getvalue(string s, int yl, int yr) {
 				}
 				*/
 				var[i] = getvalue(s1, yl, yr);
-				
+				/*
 				if (var[i].name == "jupiter") {
-					cout << "------- begin -------" << endl;
+					cout << "------- jupit -------" << endl;
 					cout << "var[i] " << var[i] << endl;
 					cout << "cdr jupiter " << getvalue("(cdr jupiter)", yl, tot) << endl;
 					cout << "s " << s << endl;
 					cout << "-------  end  -------" << endl;
 				}
-				
+				*/
 				/*
 				if (var[i].name == "coin-values") {
 					cout << "s1c2 " << var[i] << endl;
@@ -1561,6 +1560,7 @@ num getvalue(string s, int yl, int yr) {
 		//cout << "2" << endl;
 		//if (!s.find("(list ") && !s.find("(append ")) {
 		//tot = max(bkv, pl);
+		
 		if (var[tot].id == 8 && var[tot].name != "") {
 			//tot = max(bkv, pl);
 			//cout << "clear " << s << endl;
@@ -1572,7 +1572,7 @@ num getvalue(string s, int yl, int yr) {
 		} else {
 			int back = 1, rrr = tot;
 			for (; tot > pl && tot > bkv; tot--) {
-				if (var[tot].id != 8 && var[tot].name != "") {
+				if (var[tot].name != "") {
 					var[tot].id = 0;
 					var[tot].name = "";
 					var[tot].later = "";
@@ -1597,15 +1597,18 @@ num getvalue(string s, int yl, int yr) {
 		//cout << "s " << s << endl;
 		//cout << "a " << a << endl;
 		//cout << "out" << endl;
+		/*
 		if (s == "(choose-col (+ n 1))") {
 			cout << "ans2 " << a << endl;
 		}
 		if (s == "(choose-col 1)") {
 			cout << "ans1 " << a << endl;
 		}
-		if (s[1] == 'f' && s[2] == 'i') {
+		*/
+		/*
+		if (s[1] == 'f' && s[2] == 'i' && s[3] == 'l') {
 			cout << "------- begin -------" << endl;
-			cout << "s " << s << endl << "ans3 " << a << endl;
+			cout << "s " << s << endl << "ans3 " << a << " pt " << tr << endl;
 			cout << "func " << z << endl;
 			for (int i = pl + 1; i <= pr; i++) {
 				cout << "var" << i << " "  << var[i] << endl;
@@ -1615,9 +1618,8 @@ num getvalue(string s, int yl, int yr) {
 			cout << "s " << s << endl << "ans4 " << a << endl;
 		} else if (s[1] == 'v' && s[2] == 'a') {
 			cout << "s " << s << endl << "ans5 " << a << endl;
-		} else if (s[1] == 'f') {
-			cout << "s " << s << endl << "anso " << a << endl;
 		}
+		*/
 		return a;
 		//cout << sf << endl;
 	}
@@ -1725,8 +1727,6 @@ int main() {
 			gets(forgets);
 			s += forgets;
 			if (s == "Requiescat in pace") break;
-			calclr(s);
-			if (lbra != rbra) continue;
 			bool dd = 1;
 			string::iterator ti, it;
 			it = s.begin();
@@ -1740,6 +1740,9 @@ int main() {
 				}
 				//cout << s << endl;
 			}
+			calclr(s);
+			if (lbra != rbra) continue;
+			
 			it = s.begin();
 			while (*it == ' ' && !s.empty()) {
 				s.erase(it);
@@ -1832,28 +1835,32 @@ int main() {
 				//cout << "here\n";
 				num ans = getvalue(s);
 				//cout << ans.id << endl;
+				/*
 				if (ans.id == 8) cout << '(';
 				cout << ans;
 				if (ans.id == 8) cout << ')';
 				cout << endl;
+				*/
 				s.clear();
 				//tot = bkv;
 				//, ftot = bkf;
 			}
 		} else if (!s.empty()) {
 			num ans = getvalue(s);
+			/*
 			if (ans.id == 8) cout << '(';
 			cout << ans;
 			if (ans.id == 8) cout << ')';
 			cout << endl;
+			*/
 			s.clear();
 			//tot = bkv, ftot = bkf;
 		}
-		if (ftot >= 38) {
+		/*if (ftot >= 38) {
 		cout << "f803 name " << fname[38] << endl;
 		cout << "f803 fmat " << fmat[38] << endl;
 		cout << "f803 func " << func[38] << endl;
-		}
+		}*/
 		//tot = bkv, ftot = bkf;
 		//cout << tot << " " << ftot << endl;
 		//cout << var[5].car << " " << var[5].cdr << endl;
